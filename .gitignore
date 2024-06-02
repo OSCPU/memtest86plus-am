@@ -7,6 +7,8 @@
 # Object files
 *.o
 
+build/
+
 # Generated files
 build_version.h
 gdbscript

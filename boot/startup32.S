@@ -41,6 +41,7 @@ startup32:
 	leal	(startup - startup32)(%ebx), %edi
 	jmp	startup
 
+#if 0
 # The Linux 32-bit EFI handover point.
 
 	.org	0x10
@@ -75,6 +76,7 @@ efi_handover:
 	movl	%eax, %esi
 	movl	0x214(%esi), %ebx	# bootparams.code32_start
 	leal	(startup - startup32)(%ebx), %edi
+#endif
 
 # The 32-bit entry point for AP boot and for restart after relocation.
 
@@ -168,6 +170,7 @@ init_idt_descr:
 	lidt	idt_descr@GOTOFF(%ebx)
 
 	# Zero the BSS (if first boot).
+#if 0
 
 	cmpl	$1, first_boot@GOTOFF(%ebx)
 	jne	1f
@@ -181,6 +184,7 @@ init_idt_descr:
 	jnz	0b
 	movl	$0, first_boot@GOTOFF(%ebx)
 1:
+#endif
 	# Initialise the FPU.
 
 	finit
@@ -248,6 +252,7 @@ init_idt_descr:
 	pushl	$257	# vector
 	jmp	int_handler32
 
+#if 0
 # The EFI PE32 boot entry point.
 
 	.org	0x1e0
@@ -262,6 +267,7 @@ efi_boot:
 	pushl	%ecx			# the EFI image handle
 
 	call	efi_handover		# never returns
+#endif
 
 # Initialise the 64-bit IDT.
 

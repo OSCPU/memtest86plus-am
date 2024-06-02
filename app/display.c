@@ -23,7 +23,10 @@
 
 #include "config.h"
 #include "error.h"
-#include "build_version.h"
+//#include "build_version.h"
+
+#define MT_VERSION "7.00"
+#define GIT_HASH "3f86696"
 
 #include "tests.h"
 

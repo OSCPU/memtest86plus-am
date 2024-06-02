@@ -22,6 +22,7 @@ typedef volatile bool spinlock_t;
  */
 static inline void spin_wait(spinlock_t *lock)
 {
+  return;
     if (lock) {
         while (*lock) {
             __builtin_ia32_pause();
@@ -34,6 +35,7 @@ static inline void spin_wait(spinlock_t *lock)
  */
 static inline void spin_lock(spinlock_t *lock)
 {
+  return;
     if (lock) {
         while (!__sync_bool_compare_and_swap(lock, false, true)) {
             do {
@@ -48,6 +50,7 @@ static inline void spin_lock(spinlock_t *lock)
  */
 static inline void spin_unlock(spinlock_t *lock)
 {
+  return;
     if (lock) {
         __sync_synchronize();
         *lock = false;
