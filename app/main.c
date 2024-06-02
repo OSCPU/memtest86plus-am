@@ -78,8 +78,8 @@
 
 static volatile int     init_state = 0;
 
-static uintptr_t        low_load_addr;
-static uintptr_t        high_load_addr;
+//static uintptr_t        low_load_addr;
+//static uintptr_t        high_load_addr;
 
 static barrier_t        *start_barrier = NULL;
 
@@ -154,6 +154,7 @@ uint8_t _stacks[BSP_STACK_SIZE];
         barrier_spin_wait(start_barrier); \
     }
 
+#if 0
 static void run_at(uintptr_t addr, int my_cpu)
 {
   return;
@@ -205,6 +206,7 @@ static bool set_load_addr(uintptr_t *load_addr, size_t program_size, uintptr_t l
     trace(0, "Insufficient free space in range 0x%x to 0x%x", lower_limit, upper_limit - 1);
     return false;
 }
+#endif
 
 static void global_init(void)
 {
@@ -303,12 +305,12 @@ static void global_init(void)
 
     size_t program_size = (_stacks - _start) + BSP_STACK_SIZE + (num_enabled_cpus - 1) * AP_STACK_SIZE;
 
-    bool load_addr_ok = set_load_addr(& low_load_addr, program_size,         0x1000,  LOW_LOAD_LIMIT)
-                     && set_load_addr(&high_load_addr, program_size, LOW_LOAD_LIMIT, HIGH_LOAD_LIMIT);
+//    bool load_addr_ok = set_load_addr(& low_load_addr, program_size,         0x1000,  LOW_LOAD_LIMIT)
+//                     && set_load_addr(&high_load_addr, program_size, LOW_LOAD_LIMIT, HIGH_LOAD_LIMIT);
 
     trace(0, "program size %ikB", (int)(program_size / 1024));
-    trace(0, " low_load_addr %0*x", 2*sizeof(uintptr_t),  low_load_addr);
-    trace(0, "high_load_addr %0*x", 2*sizeof(uintptr_t), high_load_addr);
+//    trace(0, " low_load_addr %0*x", 2*sizeof(uintptr_t),  low_load_addr);
+//    trace(0, "high_load_addr %0*x", 2*sizeof(uintptr_t), high_load_addr);
     for (int i = 0; i < pm_map_size; i++) {
         trace(0, "pm %0*x - %0*x", 2*sizeof(uintptr_t), pm_map[i].start, 2*sizeof(uintptr_t), pm_map[i].end);
     }
@@ -319,11 +321,11 @@ static void global_init(void)
         //trace(0, "ACPI SLIT found at %0*x", 2*sizeof(uintptr_t), acpi_config.slit_addr);
     }
 
-    if (!load_addr_ok) {
-        trace(0, "Cannot relocate program. Press any key to reboot...");
-        while (get_key() == 0) { }
-        reboot();
-    }
+//    if (!load_addr_ok) {
+//        trace(0, "Cannot relocate program. Press any key to reboot...");
+//        while (get_key() == 0) { }
+//        reboot();
+//    }
 
     start_barrier = smp_alloc_barrier(1);
     run_barrier   = smp_alloc_barrier(1);
@@ -492,6 +494,7 @@ static void test_all_windows(int my_cpu)
         }
         SHORT_BARRIER;
 
+#if 0
         // Relocate if necessary.
         if (window_num > 0) {
             if (!dummy_run && (uintptr_t)&_start != low_load_addr) {
@@ -502,6 +505,7 @@ static void test_all_windows(int my_cpu)
                 run_at(high_load_addr, my_cpu);
             }
         }
+#endif
 
         if (i_am_master) {
             //trace(my_cpu, "start window %i", window_num);
