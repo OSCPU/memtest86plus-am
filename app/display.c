@@ -145,11 +145,11 @@ void display_init(void)
     set_background_colour(WHITE);
     clear_screen_region(ROW_FOOTER, 0, ROW_FOOTER, SCREEN_WIDTH - 1);
     prints(ROW_FOOTER, 0, " <ESC> Exit  <F1> Configuration  <Space> Scroll Lock");
-    prints(ROW_FOOTER, 64, MT_VERSION "." GIT_HASH);
+    prints(ROW_FOOTER, 54, MT_VERSION "." GIT_HASH);
 #if TESTWORD_WIDTH > 32
-    prints(ROW_FOOTER, 76, ".x64");
+    prints(ROW_FOOTER, 66, "#64-bit");
 #else
-    prints(ROW_FOOTER, 76, ".x32");
+    prints(ROW_FOOTER, 66, "#32-bit");
 #endif
     set_foreground_colour(WHITE);
     set_background_colour(BLUE);
@@ -160,13 +160,6 @@ void display_init(void)
     if (clks_per_msec) {
         display_cpu_clk((int)(clks_per_msec / 1000));
     }
-#if TESTWORD_WIDTH < 64
-    if (cpuid_info.flags.lm) {
-        display_cpu_addr_mode(" [LM]");
-    } else if (cpuid_info.flags.pae) {
-        display_cpu_addr_mode("[PAE]");
-    }
-#endif
     if (l1_cache) {
         display_l1_cache_size(l1_cache);
     }
