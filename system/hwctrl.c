@@ -91,7 +91,6 @@ void floppy_off()
 
 void cursor_off()
 {
-  assert(0);
     // Set HW cursor off screen.
 //    outb(0x0f, 0x3d4);
 //    outb(0xff, 0x3d5);
