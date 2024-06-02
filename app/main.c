@@ -81,7 +81,9 @@ static volatile int     init_state = 0;
 //static uintptr_t        low_load_addr;
 //static uintptr_t        high_load_addr;
 
-static barrier_t        *start_barrier = NULL;
+static barrier_t b0, b1;
+static barrier_t        *start_barrier = &b0;
+static spinlock_t lk0;
 
 static bool             start_run  = false;
 static bool             start_pass = false;
@@ -110,9 +112,9 @@ int         num_enabled_cpus = 1;
 
 int         master_cpu = 0;
 
-barrier_t   *run_barrier = NULL;
+barrier_t   *run_barrier = &b1;
 
-spinlock_t  *error_mutex = NULL;
+spinlock_t  *error_mutex = &lk0;
 
 vm_map_t    vm_map[MAX_MEM_SEGMENTS];
 int         vm_map_size = 0;
@@ -327,10 +329,15 @@ static void global_init(void)
 //        reboot();
 //    }
 
-    start_barrier = smp_alloc_barrier(1);
-    run_barrier   = smp_alloc_barrier(1);
+    //start_barrier = smp_alloc_barrier(1);
+    //run_barrier   = smp_alloc_barrier(1);
 
-    error_mutex   = smp_alloc_mutex();
+    //error_mutex   = smp_alloc_mutex();
+
+    barrier_init(start_barrier, 1);
+    barrier_init(run_barrier,   1);
+
+    spin_unlock(error_mutex);
 
     start_run = true;
     dummy_run = true;
