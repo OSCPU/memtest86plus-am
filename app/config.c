@@ -69,7 +69,7 @@ bool            smp_enabled        = false;
 
 bool            enable_big_status  = true;
 bool            enable_temperature = true;
-bool            enable_trace       = false;
+bool            enable_trace       = true;
 
 bool            enable_sm          = true;
 bool            enable_bench       = true;

@@ -155,7 +155,7 @@ static void global_init(void)
     if (enable_trace) {
         display_pinned_message(0, 0,"CPU Trace");
         display_pinned_message(1, 0,"--- ----------------------------------------------------------------------------");
-        set_scroll_lock(true);
+//        set_scroll_lock(true);
     } else if (enable_sm) {
         post_display_init();
     }
