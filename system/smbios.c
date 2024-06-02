@@ -42,6 +42,7 @@ static char *get_tstruct_string(struct tstruct_header *header, uint16_t maxlen, 
     return NULL;
 }
 
+#if 0
 #ifdef __x86_64__
 static smbiosv2_t *find_smbiosv2_in_efi64_system_table(efi64_system_table_t *system_table)
 {
@@ -56,6 +57,7 @@ static smbiosv2_t *find_smbiosv2_in_efi64_system_table(efi64_system_table_t *sys
     }
     return (smbiosv2_t *) table_addr;
 }
+#endif
 #endif
 
 smbiosv2_t *find_smbiosv2_in_efi32_system_table(efi32_system_table_t *system_table)

@@ -68,8 +68,8 @@ typedef struct {
 // Private Variables
 //------------------------------------------------------------------------------
 
-static const efi_guid_t EFI_ACPI_1_RDSP_GUID = { 0xeb9d2d30, 0x2d88, 0x11d3, {0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d} };
-static const efi_guid_t EFI_ACPI_2_RDSP_GUID = { 0x8868e871, 0xe4f1, 0x11d3, {0xbc, 0x22, 0x00, 0x80, 0xc7, 0x3c, 0x88, 0x81} };
+const efi_guid_t EFI_ACPI_1_RDSP_GUID = { 0xeb9d2d30, 0x2d88, 0x11d3, {0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d} };
+const efi_guid_t EFI_ACPI_2_RDSP_GUID = { 0x8868e871, 0xe4f1, 0x11d3, {0xbc, 0x22, 0x00, 0x80, 0xc7, 0x3c, 0x88, 0x81} };
 
 //------------------------------------------------------------------------------
 // Variables
@@ -100,6 +100,7 @@ rsdp_t *scan_for_rsdp(uintptr_t addr, int length)
     return NULL;
 }
 
+#if 0
 #ifdef __x86_64__
 static rsdp_t *find_rsdp_in_efi64_system_table(efi64_system_table_t *system_table)
 {
@@ -140,6 +141,7 @@ rsdp_t *find_rsdp_in_efi32_system_table(efi32_system_table_t *system_table)
     }
     return (rsdp_t *)table_addr;
 }
+#endif
 #endif
 
 static uintptr_t find_rsdp(void)
