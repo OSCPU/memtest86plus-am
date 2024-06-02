@@ -46,7 +46,7 @@ size_t      num_pm_pages = 0;
 
 // Some PC BIOS e820 responses include overlapping entries.
 // Here we create a new map with the overlaps removed.
-static int sanitize_e820_map(e820_entry_t new_map[], const e820_entry_t orig_map[], int orig_entries)
+int sanitize_e820_map(e820_entry_t new_map[], const e820_entry_t orig_map[], int orig_entries)
 {
     struct change_member {
         const e820_entry_t *entry;  // pointer to original bios entry
@@ -252,10 +252,13 @@ void pmem_init(void)
 
     num_pm_pages = 0;
 
+#if 0
     const boot_params_t *boot_params = (boot_params_t *)boot_params_addr;
 
     int sanitized_entries = sanitize_e820_map(sanitized_map, boot_params->e820_map, boot_params->e820_entries);
 
     init_pm_map(sanitized_map, sanitized_entries);
+#endif
+    init_pm_map(sanitized_map, 0);
     sort_pm_map();
 }

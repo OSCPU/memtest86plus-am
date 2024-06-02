@@ -37,7 +37,7 @@ typedef struct {
     uint8_t     b;
 } __attribute__((packed)) rgb_value_t;
 
-static const rgb_value_t vga_pallete[16] = {
+const rgb_value_t vga_pallete[16] = {
     //  R    G    B
     {   0,   0,   0 },  // BLACK
     {   0,   0, 170 },  // BLUE
@@ -61,7 +61,7 @@ static vga_buffer_t *vga_buffer = NULL;
 
 vga_buffer_t shadow_buffer;
 
-static int lfb_bytes_per_pixel = 0;
+int lfb_bytes_per_pixel = 0;
 
 static uintptr_t lfb_base;
 static uintptr_t lfb_stride;
@@ -93,7 +93,7 @@ static void parse_option(const char *option, int option_length)
     }
 }
 
-static void parse_cmd_line(uintptr_t cmd_line_addr, uint32_t cmd_line_size)
+void parse_cmd_line(uintptr_t cmd_line_addr, uint32_t cmd_line_size)
 {
     if (cmd_line_addr != 0) {
         if (cmd_line_size == 0) cmd_line_size = 255;
@@ -142,7 +142,7 @@ static int lfb_offset(int row, int col, int x, int y, int bpp)
     }
 }
 
-static void lfb8_put_char(int row, int col, uint8_t ch, uint8_t attr)
+void lfb8_put_char(int row, int col, uint8_t ch, uint8_t attr)
 {
     shadow_buffer[row][col].ch   = ch;
     shadow_buffer[row][col].attr = attr;
@@ -172,7 +172,7 @@ static void lfb8_put_char(int row, int col, uint8_t ch, uint8_t attr)
    }
 }
 
-static void lfb16_put_char(int row, int col, uint8_t ch, uint8_t attr)
+void lfb16_put_char(int row, int col, uint8_t ch, uint8_t attr)
 {
     shadow_buffer[row][col].ch   = ch;
     shadow_buffer[row][col].attr = attr;
@@ -202,7 +202,7 @@ static void lfb16_put_char(int row, int col, uint8_t ch, uint8_t attr)
     }
 }
 
-static void lfb24_put_char(int row, int col, uint8_t ch, uint8_t attr)
+void lfb24_put_char(int row, int col, uint8_t ch, uint8_t attr)
 {
     shadow_buffer[row][col].ch   = ch;
     shadow_buffer[row][col].attr = attr;
@@ -238,7 +238,7 @@ static void lfb24_put_char(int row, int col, uint8_t ch, uint8_t attr)
     }
 }
 
-static void lfb32_put_char(int row, int col, uint8_t ch, uint8_t attr)
+void lfb32_put_char(int row, int col, uint8_t ch, uint8_t attr)
 {
     shadow_buffer[row][col].ch   = ch;
     shadow_buffer[row][col].attr = attr;
@@ -281,6 +281,7 @@ static void put_value(int row, int col, uint16_t value)
 
 void screen_init(void)
 {
+#if 0
     const boot_params_t *boot_params = (boot_params_t *)boot_params_addr;
 
     parse_cmd_line(boot_params->cmd_line_ptr, boot_params->cmd_line_size);
@@ -377,6 +378,7 @@ void screen_init(void)
     } else if (screen_info->orig_video_isVGA != VIDEO_TYPE_NONE) {
         vga_buffer = (vga_buffer_t *)(0xb8000);
     }
+#endif
 }
 
 void set_foreground_colour(screen_colour_t colour)

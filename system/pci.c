@@ -61,7 +61,7 @@ static bool pci_sanity_check(void)
     return pci_config_read16(0, 0, 0, PCI_CLASS_DEVICE) == PCI_CLASS_BRIDGE_HOST;
 }
 
-static void probe_config_type(void)
+void probe_config_type(void)
 {
     uint8_t  tmpCFB;
     uint32_t tmpCF8;
@@ -128,6 +128,7 @@ static int pci_config2_access_addr(int dev, int reg)
 
 void pci_init(void)
 {
+#if 0
     const boot_params_t *boot_params = (boot_params_t *)boot_params_addr;
     if (boot_params->efi_info.loader_signature) {
         // On UEFI systems we can assume configuration type 1.
@@ -135,6 +136,7 @@ void pci_init(void)
     } else {
         probe_config_type();
     }
+#endif
 }
 
 uint8_t pci_config_read8(int bus, int dev, int func, int reg)

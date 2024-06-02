@@ -32,6 +32,7 @@ static efi_runtime_services_t   *efi_rs_table = NULL;
 
 void hwctrl_init(void)
 {
+#if 0
     boot_params_t *boot_params = (boot_params_t *)boot_params_addr;
 #ifdef __x86_64__
     if (boot_params->efi_info.loader_signature == EFI64_LOADER_SIGNATURE) {
@@ -49,6 +50,7 @@ void hwctrl_init(void)
             efi_rs_table = (efi_runtime_services_t *)(uintptr_t)sys_table->runtime_services;
         }
     }
+#endif
 #endif
 }
 

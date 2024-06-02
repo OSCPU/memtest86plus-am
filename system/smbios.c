@@ -58,7 +58,7 @@ static smbiosv2_t *find_smbiosv2_in_efi64_system_table(efi64_system_table_t *sys
 }
 #endif
 
-static smbiosv2_t *find_smbiosv2_in_efi32_system_table(efi32_system_table_t *system_table)
+smbiosv2_t *find_smbiosv2_in_efi32_system_table(efi32_system_table_t *system_table)
 {
     efi32_config_table_t *config_tables = (efi32_config_table_t *) map_region(system_table->config_tables, system_table->num_config_tables * sizeof(efi32_config_table_t), true);
     if (config_tables == NULL) return NULL;
@@ -74,6 +74,7 @@ static smbiosv2_t *find_smbiosv2_in_efi32_system_table(efi32_system_table_t *sys
 
 static uintptr_t find_smbiosv2_adr(void)
 {
+#if 0
     const boot_params_t *boot_params = (boot_params_t *) boot_params_addr;
     const efi_info_t *efi_info = & boot_params->efi_info;
 
@@ -113,7 +114,7 @@ static uintptr_t find_smbiosv2_adr(void)
                 return (uintptr_t) dmi;
         }
     }
-
+#endif
     return 0;
 }
 

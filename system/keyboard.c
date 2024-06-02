@@ -222,6 +222,7 @@ keyboard_types_t keyboard_types = KT_NONE;
 
 void keyboard_init(void)
 {
+#if 0
     if (keyboard_types == KT_NONE) {
         // No command line option was found, so set the default according to
         // how we were booted.
@@ -235,6 +236,8 @@ void keyboard_init(void)
     if (keyboard_types & KT_USB) {
         find_usb_keyboards(keyboard_types == KT_USB);
     }
+#endif
+    keyboard_types = KT_NONE;
 }
 
 char get_key(void)

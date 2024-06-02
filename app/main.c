@@ -156,6 +156,7 @@ uint8_t _stacks[BSP_STACK_SIZE];
 
 static void run_at(uintptr_t addr, int my_cpu)
 {
+  return;
     uintptr_t *new_start_addr = (uintptr_t *)(addr + startup - _start);
 
     if (my_cpu == 0) {
@@ -213,7 +214,7 @@ static void global_init(void)
 
     // Nothing before this should access the boot parameters, in case they are located above 4GB.
     // This is the first region we map, so it is guaranteed not to fail.
-    boot_params_addr = map_region(boot_params_addr, sizeof(boot_params_t), true);
+    //boot_params_addr = map_region(boot_params_addr, sizeof(boot_params_t), true);
 
     hwctrl_init();
 
@@ -564,8 +565,19 @@ static void select_next_master(void)
 
 // The main entry point called from the startup code.
 
+static Context *simple_trap(Event ev, Context *ctx) {
+  switch (ev.event) {
+    case EVENT_ERROR:
+      printf("ERROR@pc = %p: %s\n", ctx->eip, ev.msg);
+      assert(0);
+    default:;
+  }
+  return ctx;
+}
+
 void main(void)
 {
+  cte_init(simple_trap);
     int my_cpu;
     if (init_state == 0) {
         // If this is the first time here, we must be CPU 0, as the APs haven't been started yet.

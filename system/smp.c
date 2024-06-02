@@ -776,6 +776,7 @@ static bool start_cpu(int cpu_num)
 
 void smp_init(bool smp_enable)
 {
+  return;
     for (int i = 0; i < (int)(ARRAY_SIZE(apic_id_to_cpu_num)); i++) {
         apic_id_to_cpu_num[i] = 0;
     }

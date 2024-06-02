@@ -83,7 +83,7 @@ acpi_t acpi_config = {0, 0, 0, 0, 0, /*0,*/ 0, 0, 0, false};
 // Private Functions
 //------------------------------------------------------------------------------
 
-static rsdp_t *scan_for_rsdp(uintptr_t addr, int length)
+rsdp_t *scan_for_rsdp(uintptr_t addr, int length)
 {
     uint32_t *ptr = (uint32_t *)addr;
     uint32_t *end = ptr + length / sizeof(uint32_t);
@@ -121,7 +121,7 @@ static rsdp_t *find_rsdp_in_efi64_system_table(efi64_system_table_t *system_tabl
     return (rsdp_t *)table_addr;
 }
 #else
-static rsdp_t *find_rsdp_in_efi32_system_table(efi32_system_table_t *system_table)
+rsdp_t *find_rsdp_in_efi32_system_table(efi32_system_table_t *system_table)
 {
     efi32_config_table_t *config_tables = (efi32_config_table_t *)map_region(system_table->config_tables,
                                                                              system_table->num_config_tables * sizeof(efi32_config_table_t),
@@ -144,6 +144,7 @@ static rsdp_t *find_rsdp_in_efi32_system_table(efi32_system_table_t *system_tabl
 
 static uintptr_t find_rsdp(void)
 {
+#if 0
     const boot_params_t *boot_params = (boot_params_t *)boot_params_addr;
 
     const efi_info_t *efi_info = &boot_params->efi_info;
@@ -186,6 +187,8 @@ static uintptr_t find_rsdp(void)
         return 0;
     }
     return (uintptr_t)rp;
+#endif
+        return 0;
 }
 
 static uintptr_t find_acpi_table(uint32_t table_signature)

@@ -273,7 +273,7 @@ static void parse_option(const char *option, const char *params)
     }
 }
 
-static void parse_command_line(char *cmd_line, int cmd_line_size)
+void parse_command_line(char *cmd_line, int cmd_line_size)
 {
     const char *option = cmd_line;
     const char *params = NULL;
@@ -849,6 +849,7 @@ void config_init(void)
 
     power_save = POWER_SAVE_HIGH;
 
+#if 0
     const boot_params_t *boot_params = (boot_params_t *)boot_params_addr;
 
     uintptr_t cmd_line_addr = boot_params->cmd_line_ptr;
@@ -860,6 +861,7 @@ void config_init(void)
             parse_command_line((char *)cmd_line_addr, cmd_line_size);
         }
     }
+#endif
 }
 
 void config_menu(bool initial)

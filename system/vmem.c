@@ -41,7 +41,7 @@
 // Private Variables
 //------------------------------------------------------------------------------
 
-static unsigned int device_pages_used = 0;
+unsigned int device_pages_used = 0;
 
 static uintptr_t    mapped_window = 2;
 
@@ -51,6 +51,8 @@ static uintptr_t    mapped_window = 2;
 
 static void load_pdbr()
 {
+  return;
+#if 0
     void *page_table;
     if (cpuid_info.flags.lm == 1) {
         page_table = pml4;
@@ -68,6 +70,7 @@ static void load_pdbr()
         : "r" (page_table)
         : "rax"
     );
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -76,6 +79,8 @@ static void load_pdbr()
 
 uintptr_t map_region(uintptr_t base_addr, size_t size, bool only_for_startup)
 {
+  return base_addr;
+#if 0
     uintptr_t last_addr = base_addr + size - 1;
     // Check if the requested region is permanently mapped. If it is only needed during startup,
     // this includes the region we will eventually use for the memory test window.
@@ -106,6 +111,7 @@ uintptr_t map_region(uintptr_t base_addr, size_t size, bool only_for_startup)
     load_pdbr();
     // Return the mapped address.
     return VM_REGION_START + first_virt_page * VM_PAGE_SIZE + base_addr % VM_PAGE_SIZE;
+#endif
 }
 
 bool map_window(uintptr_t start_page)
@@ -131,7 +137,7 @@ bool map_window(uintptr_t start_page)
     }
     // Compute the page table entries.
     for (uintptr_t i = 0; i < 512; i++) {
-        pd2[i] = ((uint64_t)window << 30) + (i << VM_PAGE_SHIFT) + 0x83;
+//        pd2[i] = ((uint64_t)window << 30) + (i << VM_PAGE_SHIFT) + 0x83;
     }
     // Reload the PDBR to flush any remnants of the old mapping.
     load_pdbr();
