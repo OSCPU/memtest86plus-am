@@ -577,6 +577,7 @@ static Context *simple_trap(Event ev, Context *ctx) {
 
 void main(void)
 {
+  ioe_init();
   cte_init(simple_trap);
     int my_cpu;
     if (init_state == 0) {
