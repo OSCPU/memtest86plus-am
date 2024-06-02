@@ -19,6 +19,7 @@
 #include "string.h"
 
 #include "pmem.h"
+#include <am.h>
 
 //------------------------------------------------------------------------------
 // Constants
@@ -193,6 +194,7 @@ static int sanitize_e820_map(e820_entry_t new_map[], const e820_entry_t orig_map
 
 static void init_pm_map(const e820_entry_t e820_map[], int e820_entries)
 {
+#if 0
     pm_map_size = 0;
     for (int i = 0; i < e820_entries; i++) {
         if (e820_map[i].type == E820_RAM || e820_map[i].type == E820_ACPI) {
@@ -220,6 +222,10 @@ static void init_pm_map(const e820_entry_t e820_map[], int e820_entries)
             }
         }
     }
+#endif
+    pm_map[0].start = (uintptr_t)heap.start >> PAGE_SHIFT;
+    pm_map[0].end = (uintptr_t)heap.end >> PAGE_SHIFT;
+    pm_map_size ++;
 }
 
 static void sort_pm_map(void)
