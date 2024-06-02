@@ -9,6 +9,7 @@
 #include "string.h"
 
 #include "print.h"
+#include <am.h>
 
 //------------------------------------------------------------------------------
 // Constants
@@ -148,7 +149,7 @@ int printx(int row, int col, uintptr_t value, int field_length, bool pad, bool l
     return print_in_field(row, col, buffer, -length, field_length, left);
 }
 
-int printk(int row, int col, uintptr_t value, int field_length, bool pad, bool left, bool add_space)
+int printkk(int row, int col, uintptr_t value, int field_length, bool pad, bool left, bool add_space)
 {
     static const char suffix[4] = { 'K', 'M', 'G', 'T' };
 
@@ -200,7 +201,7 @@ int printk(int row, int col, uintptr_t value, int field_length, bool pad, bool l
     return print_in_field(row, col, buffer, -length, field_length, left);
 }
 
-int printf(int row, int col, const char *fmt, ...)
+int printk(int row, int col, const char *fmt, ...)
 {
     va_list args;
 
@@ -273,7 +274,7 @@ int vprintf(int row, int col, const char *fmt, va_list args)
             col = printx(row, col, va_arg(args, uintptr_t), length, pad, left);
             break;
           case 'k':
-            col = printk(row, col, va_arg(args, uintptr_t), length, pad, left, add_space);
+            col = printkk(row, col, va_arg(args, uintptr_t), length, pad, left, add_space);
             break;
         }
         fmt++;

@@ -14,6 +14,9 @@
 
 #include "screen.h"
 
+#include <am.h>
+#include <assert.h>
+
 //------------------------------------------------------------------------------
 // Private Types
 //------------------------------------------------------------------------------
@@ -121,6 +124,7 @@ static void vga_put_char(int row, int col, uint8_t ch, uint8_t attr)
     shadow_buffer[row][col].ch   = ch;
     shadow_buffer[row][col].attr = attr;
 
+    printf("\033[%d;%dH%c", row + 1, col + 1, ch);
     if (vga_buffer) {
         (*vga_buffer)[row][col].value = shadow_buffer[row][col].value;
     }

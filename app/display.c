@@ -387,7 +387,7 @@ void display_temperature(void)
     int offset = actual_cpu_temp / 100 + max_cpu_temp / 100;
 
     clear_screen_region(1, 18, 1, 22);
-    printf(1, 20-offset, "%2i/%2i%cC", actual_cpu_temp, max_cpu_temp, 0xF8);
+    printk(1, 20-offset, "%2i/%2i%cC", actual_cpu_temp, max_cpu_temp, 0xF8);
 }
 
 void display_big_status(bool pass)

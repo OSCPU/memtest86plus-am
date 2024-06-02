@@ -57,7 +57,7 @@ int printx(int row, int col, uintptr_t value, int length, bool pad, bool left);
  * 3 significant figures in the nearest K/M/G/T units. Returns the next column
  * after the formatted value.
  */
-int printk(int row, int col, uintptr_t value, int length,
+int printkk(int row, int col, uintptr_t value, int length,
            bool pad, bool left, bool add_space);
 
 /**
@@ -81,7 +81,7 @@ int printk(int row, int col, uintptr_t value, int length,
  *
  * Returns the next column after the formatted string.
  */
-int printf(int row, int col, const char *fmt, ...);
+int printk(int row, int col, const char *fmt, ...);
 
 /**
  * The alternate form of printf.

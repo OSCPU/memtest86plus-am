@@ -520,7 +520,7 @@ static void address_range_menu(void)
     prints(POP_R+4, POP_LI, "<F2>  Set upper limit");
     prints(POP_R+5, POP_LI, "<F3>  Test all memory");
     prints(POP_R+6, POP_LI, "<F10> Exit menu");
-    printf(POP_R+8, POP_LM, "Current range: %kB - %kB", pm_limit_lower << 2, pm_limit_upper << 2);
+    printk(POP_R+8, POP_LM, "Current range: %kB - %kB", pm_limit_lower << 2, pm_limit_upper << 2);
 
     bool tty_update = enable_tty;
     bool exit_menu = false;
@@ -571,7 +571,7 @@ static void address_range_menu(void)
         }
         if (changed) {
             clear_popup_row(POP_R+8);
-            printf(POP_R+8, POP_LM, "Current range: %kB - %kB", pm_limit_lower << 2, pm_limit_upper << 2);
+            printk(POP_R+8, POP_LM, "Current range: %kB - %kB", pm_limit_lower << 2, pm_limit_upper << 2);
             update_num_pages_to_test();
             restart = true;
             changed = false;
@@ -883,9 +883,9 @@ void config_menu(bool initial)
             prints(POP_R+7,  POP_LI, "<F5>  CPU selection");
             if (!smp_enabled)  set_foreground_colour(WHITE);
             //if (no_temperature) set_foreground_colour(BOLD+BLACK);
-            printf(POP_R+8,  POP_LI, "<F6>  Temperature %s", enable_temperature ? "disable" : "enable ");
+            printk(POP_R+8,  POP_LI, "<F6>  Temperature %s", enable_temperature ? "disable" : "enable ");
             //if (no_temperature) set_foreground_colour(WHITE);
-            printf(POP_R+9,  POP_LI, "<F7>  Boot trace %s",  enable_trace  ? "disable" : "enable ");
+            printk(POP_R+9,  POP_LI, "<F7>  Boot trace %s",  enable_trace  ? "disable" : "enable ");
             prints(POP_R+10, POP_LI, "<F10> Exit menu");
         } else {
             prints(POP_R+7,  POP_LI, "<F5>  Skip current test");

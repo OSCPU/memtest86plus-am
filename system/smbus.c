@@ -134,7 +134,7 @@ static void print_spdi(spd_info spdi, uint8_t lidx)
     uint16_t i;
 
     // Print Slot Index, Module Size, type & Max frequency (Jedec or XMP)
-    curcol = printf(LINE_SPD+lidx, 0, " - Slot %i: %kB %s-%i",
+    curcol = printk(LINE_SPD+lidx, 0, " - Slot %i: %kB %s-%i",
                     spdi.slot_num,
                     spdi.module_size * 1024,
                     spdi.type,
@@ -155,7 +155,7 @@ static void print_spdi(spd_info spdi, uint8_t lidx)
     // Print Manufacturer from JEDEC106
     for (i = 0; i < JEP106_CNT; i++) {
         if (spdi.jedec_code == jep106[i].jedec_code) {
-            curcol = printf(LINE_SPD+lidx, ++curcol, "- %s", jep106[i].name);
+            curcol = printk(LINE_SPD+lidx, ++curcol, "- %s", jep106[i].name);
             break;
         }
     }
@@ -164,7 +164,7 @@ static void print_spdi(spd_info spdi, uint8_t lidx)
     if (spdi.jedec_code == 0) {
         curcol = prints(LINE_SPD+lidx, ++curcol, "- Noname");
     } else if (i == JEP106_CNT) {
-        curcol = printf(LINE_SPD+lidx, ++curcol, "- Unknown (0x%x)", spdi.jedec_code);
+        curcol = printk(LINE_SPD+lidx, ++curcol, "- Unknown (0x%x)", spdi.jedec_code);
     }
 
     // Print SKU
@@ -178,7 +178,7 @@ static void print_spdi(spd_info spdi, uint8_t lidx)
     //  - values 32..95 and > 99 are considered invalid.
     if (curcol <= 69 && spdi.fab_week <= 53 && spdi.fab_week != 0 &&
         (spdi.fab_year < 32 || (spdi.fab_year >= 96 && spdi.fab_year <= 99))) {
-        curcol = printf(LINE_SPD+lidx, ++curcol, "(%02i%02i-W%02i)",
+        curcol = printk(LINE_SPD+lidx, ++curcol, "(%02i%02i-W%02i)",
                         spdi.fab_year >= 96 ? 19 : 20,
                         spdi.fab_year, spdi.fab_week);
     }

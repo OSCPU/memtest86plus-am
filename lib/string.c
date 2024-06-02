@@ -32,6 +32,7 @@ void reverse(char s[])
 // Public Functions
 //------------------------------------------------------------------------------
 
+#if 0
 void *memmove(void *dest, const void *src, size_t n)
 {
     char *d = (char *)dest, *s = (char *)src;
@@ -52,6 +53,7 @@ void *memmove(void *dest, const void *src, size_t n)
     }
     return dest;
 }
+#endif
 
 #ifdef DEBUG_GDB
 
