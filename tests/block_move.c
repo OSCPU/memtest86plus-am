@@ -105,10 +105,8 @@ int test_block_move(int my_cpu, int iterations)
                 pe = end;
             }
 
-#if 0
             size_t half_length = (pe - p + 1) / 2;
             testword_t *pm = p + half_length;
-#endif
 
             for (int j = 0; j < iterations; j++) {
                 ticks++;
@@ -116,86 +114,36 @@ int test_block_move(int my_cpu, int iterations)
                     continue;
                 }
                 test_addr[my_cpu] = (uintptr_t)p;
-                assert(0);
-#if 0
-#ifdef __x86_64__
-                __asm__ __volatile__ (
-                    "cld\n"
-                    "jmp L110\n\t"
 
-                    ".p2align 4,,7\n\t"
-                    "L110:\n\t"
+                // At the end of all this
+                // - the second half equals the initial value of the first half
+                // - the first half is right shifted 64-bytes (with wrapping)
 
-                    // At the end of all this
-                    // - the second half equals the initial value of the first half
-                    // - the first half is right shifted 64-bytes (with wrapping)
+                // Move first half to second half
+                testword_t *dst = pm;  // Destination, pm (mid point)
+                testword_t *src = p;   // Source, p (start point)
+                int len = half_length; // Length, half_length
+                for (int i = 0; i < len; i ++, dst ++, src ++) {
+                  *dst = *src;
+                }
 
-                    // Move first half to second half
-                    "movq %1,%%rdi\n\t"     // Destination, pm (mid point)
-                    "movq %0,%%rsi\n\t"     // Source, p (start point)
-                    "movq %2,%%rcx\n\t"     // Length, half_length (size of a half in DWORDS)
-                    "rep\n\t"
-                    "movsq\n\t"
+                // Move the second half, less the last 8 * sizeof(uintptr_t) bytes,
+                // to the first half, offset plus 8 * sizeof(uintptr_t) bytes
+                dst = p + 8;           // Destination, p (start-point) plus 8 * sizeof(uintptr_t) bytes
+                src = pm;              // Source, pm (mid-point)
+                len = half_length - 8; // Length, half_length minus 8 * sizeof(uintptr_t) bytes
+                for (int i = 0; i < len; i ++, dst ++, src ++) {
+                  *dst = *src;
+                }
 
-                    // Move the second half, less the last 64 bytes, to the first half, offset plus 64 bytes
-                    "movq %0,%%rdi\n\t"
-                    "addq $64,%%rdi\n\t"    // Destination, p (start-point) plus 32 bytes
-                    "movq %1,%%rsi\n\t"     // Source, pm (mid-point)
-                    "movq %2,%%rcx\n\t"
-                    "subq $8,%%rcx\n\t"     // Length, half_length (size of a half in QWORDS) minus 8 QWORDS (64 bytes)
-                    "rep\n\t"
-                    "movsq\n\t"
+                // Move last 8 * sizeof(uintptr_t) bytes of the second half to the start of the first half
+                dst = p;  // Destination, p(start-point)
+                          // Source, 8 * sizeof(uintptr_t) bytes from the end of the second half, left over by the last loop
+                len = 8;  // Length, 8 * sizeof(uintptr_t) bytes
+                for (int i = 0; i < 8; i ++, dst ++, src ++) {
+                  *dst = *src;
+                }
 
-                    // Move last 8 QWORDS (64 bytes) of the second half to the start of the first half
-                    "movq %0,%%rdi\n\t"     // Destination, p(start-point)
-                                            // Source, 8 QWORDS from the end of the second half, left over by the last rep/movsl
-                    "movq $8,%%rcx\n\t"     // Length, 8 QWORDS (64 bytes)
-                    "rep\n\t"
-                    "movsq\n\t"
-
-                    :: "g" (p), "g" (pm), "g" (half_length)
-                    : "rdi", "rsi", "rcx"
-                );
-#else
-                __asm__ __volatile__ (
-                    "cld\n"
-                    "jmp L110\n\t"
-
-                    ".p2align 4,,7\n\t"
-                    "L110:\n\t"
-
-                    // At the end of all this
-                    // - the second half equals the initial value of the first half
-                    // - the first half is right shifted 32 bytes (with wrapping)
-
-                    // Move first half to second half
-                    "movl %1,%%edi\n\t"     // Destination, pm (mid point)
-                    "movl %0,%%esi\n\t"     // Source, p (start point)
-                    "movl %2,%%ecx\n\t"     // Length, half_length (size of a half in DWORDS)
-                    "rep\n\t"
-                    "movsl\n\t"
-
-                    // Move the second half, less the last 32 bytes, to the first half, offset plus 32 bytes
-                    "movl %0,%%edi\n\t"
-                    "addl $32,%%edi\n\t"    // Destination, p (start-point) plus 32 bytes
-                    "movl %1,%%esi\n\t"     // Source, pm (mid-point)
-                    "movl %2,%%ecx\n\t"
-                    "subl $8,%%ecx\n\t"     // Length, half_length (size of a half in DWORDS) minus 8 DWORDS (32 bytes)
-                    "rep\n\t"
-                    "movsl\n\t"
-
-                    // Move last 8 DWORDS (32 bytes) of the second half to the start of the first half
-                    "movl %0,%%edi\n\t"     // Destination, p(start-point)
-                                            // Source, 8 DWORDS from the end of the second half, left over by the last rep/movsl
-                    "movl $8,%%ecx\n\t"     // Length, 8 DWORDS (32 bytes)
-                    "rep\n\t"
-                    "movsl\n\t"
-
-                    :: "g" (p), "g" (pm), "g" (half_length)
-                    : "edi", "esi", "ecx"
-                );
-#endif
-#endif
                 do_tick(my_cpu);
                 BAILOUT;
             }
