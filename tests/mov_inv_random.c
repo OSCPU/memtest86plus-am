@@ -13,16 +13,10 @@
 // Released under version 2 of the Gnu Public License.
 // By Chris Brady
 
-#include <stdbool.h>
-#include <stdint.h>
-
-#include "tsc.h"
+#include "common.h"
 
 #include "display.h"
 #include "error.h"
-#include "test.h"
-
-#include "test_funcs.h"
 #include "test_helper.h"
 
 //------------------------------------------------------------------------------
@@ -34,7 +28,7 @@ int test_mov_inv_random(int my_cpu)
     int ticks = 0;
 
     testword_t seed;
-    seed = get_tsc();
+    seed = io_read(AM_TIMER_UPTIME).us;;
     seed *= 0x87654321;
 
     if (my_cpu == master_cpu) {

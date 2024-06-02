@@ -31,6 +31,7 @@ static void init_pm_map()
     pm_map[0].start = (uintptr_t)heap.start >> PAGE_SHIFT;
     pm_map[0].end = (uintptr_t)heap.end >> PAGE_SHIFT;
     pm_map_size ++;
+    num_pm_pages = pm_map[0].end - pm_map[0].start;
 }
 
 static void sort_pm_map(void)

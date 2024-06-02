@@ -12,23 +12,13 @@
 // Released under version 2 of the Gnu Public License.
 // By Chris Brady
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "common.h"
 
 #include "cache.h"
-#include "memsize.h"
-#include "tsc.h"
 #include "vmem.h"
-
-#include "barrier.h"
-
-#include "config.h"
 #include "display.h"
-#include "test.h"
-
 #include "test_funcs.h"
 #include "test_helper.h"
-
 #include "tests.h"
 
 //------------------------------------------------------------------------------
@@ -169,7 +159,7 @@ int run_test(int my_cpu, int test, int stage, int iterations)
 
         // Moving inversions, fixed random pattern.
       case 5:
-        prsg_state = get_tsc();
+        prsg_state = io_read(AM_TIMER_UPTIME).us;
         prsg_state *= 0x12345678;
 
         for (int i = 0; i < iterations; i++) {
@@ -214,7 +204,7 @@ int run_test(int my_cpu, int test, int stage, int iterations)
 
         // Modulo 20 check, fixed random pattern.
       case 9:
-        prsg_state = get_tsc();
+        prsg_state = io_read(AM_TIMER_UPTIME).us;
         prsg_state *= 0x87654321;
 
         for (int i = 0; i < iterations; i++) {

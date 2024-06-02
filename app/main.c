@@ -18,7 +18,6 @@
 #include "cache.h"
 #include "cpuinfo.h"
 #include "serial.h"
-#include "timers.h"
 #include "vmem.h"
 #include "badram.h"
 #include "display.h"
@@ -124,8 +123,6 @@ static void global_init(void)
     screen_init();
 
     pmem_init();
-
-    timers_init();
 
     membw_init();
 
