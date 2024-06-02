@@ -11,6 +11,8 @@
  * Copyright (C) 2022 Martin Whitaker.
  */
 
+#include <am.h>
+
 /*
  * Terminates the program (using a breakpoint exception) if expr is equal
  * to zero.
@@ -18,7 +20,7 @@
 static inline void assert(int expr)
 {
     if (!expr) {
-        __asm__ __volatile__ ("int $3");
+      halt(1);
     }
 }
 

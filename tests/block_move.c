@@ -22,6 +22,7 @@
 
 #include "test_funcs.h"
 #include "test_helper.h"
+#include <assert.h>
 
 //------------------------------------------------------------------------------
 // Public Functions
@@ -104,8 +105,10 @@ int test_block_move(int my_cpu, int iterations)
                 pe = end;
             }
 
+#if 0
             size_t half_length = (pe - p + 1) / 2;
             testword_t *pm = p + half_length;
+#endif
 
             for (int j = 0; j < iterations; j++) {
                 ticks++;
@@ -113,6 +116,8 @@ int test_block_move(int my_cpu, int iterations)
                     continue;
                 }
                 test_addr[my_cpu] = (uintptr_t)p;
+                assert(0);
+#if 0
 #ifdef __x86_64__
                 __asm__ __volatile__ (
                     "cld\n"
@@ -189,6 +194,7 @@ int test_block_move(int my_cpu, int iterations)
                     :: "g" (p), "g" (pm), "g" (half_length)
                     : "edi", "esi", "ecx"
                 );
+#endif
 #endif
                 do_tick(my_cpu);
                 BAILOUT;

@@ -7,7 +7,9 @@
 // builds. We don't use this for anything critical, so a floating-point
 // approximation is good enough.
 
+#if 0
 uint64_t __udivdi3(uint64_t num, uint64_t den)
 {
     return (uint64_t)((double)num / (double)den);
 }
+#endif

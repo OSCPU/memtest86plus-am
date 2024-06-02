@@ -77,9 +77,9 @@ __OUT(b,"b",char)
 __OUT(w,"w",short)
 __OUT(l,,int)
 
-__OUTS(b)
-__OUTS(w)
-__OUTS(l)
+//__OUTS(b)
+//__OUTS(w)
+//__OUTS(l)
 
 /**
  * Note that due to the way __builtin_constant_p() works, you

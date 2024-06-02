@@ -16,6 +16,7 @@
 #include "unistd.h"
 
 #include "uhci.h"
+#include <assert.h>
 
 //------------------------------------------------------------------------------
 // Constants
@@ -197,6 +198,8 @@ typedef struct {
 
 static bool io_wait_until_clr(uint16_t io_reg, uint16_t bit_mask, int max_time)
 {
+  assert(0);
+#if 0
     int timer = max_time >> 3;
     while (inw(io_reg) & bit_mask) {
         if (timer == 0) return false;
@@ -204,10 +207,13 @@ static bool io_wait_until_clr(uint16_t io_reg, uint16_t bit_mask, int max_time)
         timer--;
     }
     return true;
+#endif
 }
 
-static bool io_wait_until_set(uint16_t io_reg, uint16_t bit_mask, int max_time)
+bool io_wait_until_set(uint16_t io_reg, uint16_t bit_mask, int max_time)
 {
+  assert(0);
+#if 0
     int timer = max_time >> 3;
     while (~inw(io_reg) & bit_mask) {
         if (timer == 0) return false;
@@ -215,6 +221,7 @@ static bool io_wait_until_set(uint16_t io_reg, uint16_t bit_mask, int max_time)
         timer--;
     }
     return true;
+#endif
 }
 
 static bool reset_host_controller(uint16_t io_base)
@@ -226,20 +233,24 @@ static bool reset_host_controller(uint16_t io_base)
     return io_wait_until_clr(UHCI_USBCMD, UHCI_USBCMD_HCR, 1000*MILLISEC);
 }
 
-static bool start_host_controller(uint16_t io_base)
+bool start_host_controller2(uint16_t io_base)
 {
-    outw(UHCI_USBCMD_R_S | UHCI_USBCMD_MAXP, UHCI_USBCMD);
-    return io_wait_until_clr(UHCI_USBSTS, UHCI_USBSTS_HCH, 1000*MILLISEC);
+  assert(0);
+//    outw(UHCI_USBCMD_R_S | UHCI_USBCMD_MAXP, UHCI_USBCMD);
+//    return io_wait_until_clr(UHCI_USBSTS, UHCI_USBSTS_HCH, 1000*MILLISEC);
 }
 
 static bool halt_host_controller(uint16_t io_base)
 {
-    outw(inw(UHCI_USBCMD) & ~UHCI_USBCMD_R_S, UHCI_USBCMD);
-    return io_wait_until_set(UHCI_USBSTS, UHCI_USBSTS_HCH, 1000*MILLISEC);
+  assert(0);
+//    outw(inw(UHCI_USBCMD) & ~UHCI_USBCMD_R_S, UHCI_USBCMD);
+//    return io_wait_until_set(UHCI_USBSTS, UHCI_USBSTS_HCH, 1000*MILLISEC);
 }
 
 static bool reset_uhci_port(uint16_t io_base, int port_idx)
 {
+  assert(0);
+#if 0
     uint16_t port_status = inw(UHCI_PORT_SC(port_idx)) & ~UHCI_PORT_SC_PED;
     outw(port_status |  UHCI_PORT_SC_PR, UHCI_PORT_SC(port_idx));
 
@@ -247,20 +258,27 @@ static bool reset_uhci_port(uint16_t io_base, int port_idx)
 
     outw(port_status & ~UHCI_PORT_SC_PR, UHCI_PORT_SC(port_idx));
     return io_wait_until_clr(UHCI_PORT_SC(port_idx), UHCI_PORT_SC_PR, 5*MILLISEC);
+#endif
 }
 
-static bool enable_uhci_port(uint16_t io_base, int port_idx)
+bool enable_uhci_port(uint16_t io_base, int port_idx)
 {
+  assert(0);
+#if 0
     uint16_t port_status = inw(UHCI_PORT_SC(port_idx));
     outw(port_status | UHCI_PORT_SC_PED, UHCI_PORT_SC(port_idx));
     return io_wait_until_set(UHCI_PORT_SC(port_idx), UHCI_PORT_SC_PED, 1000*MILLISEC);
+#endif
 }
 
-static void disable_uhci_port(uint16_t io_base, int port_idx)
+void disable_uhci_port(uint16_t io_base, int port_idx)
 {
+  assert(0);
+#if 0
     uint16_t port_status = inw(UHCI_PORT_SC(port_idx));
     outw(port_status & ~UHCI_PORT_SC_PED, UHCI_PORT_SC(port_idx));
     (void)io_wait_until_clr(UHCI_PORT_SC(port_idx), UHCI_PORT_SC_PED, 1000*MILLISEC);
+#endif
 }
 
 static void build_uhci_td(uhci_td_t *td, const usb_ep_t *ep, uint32_t pid, uint32_t dt, uint32_t options,
@@ -287,6 +305,8 @@ static void build_uhci_td(uhci_td_t *td, const usb_ep_t *ep, uint32_t pid, uint3
 
 static uint16_t get_uhci_done(workspace_t *ws)
 {
+  assert(0);
+#if 0
     uint16_t io_base = ws->io_base;
 
     uint16_t status = inw(UHCI_USBSTS) & (UHCI_USBSTS_INT | UHCI_USBSTS_ERR);
@@ -304,6 +324,7 @@ static uint16_t get_uhci_done(workspace_t *ws)
         outw(UHCI_USBSTS_INT | UHCI_USBSTS_ERR, UHCI_USBSTS);
     }
     return status;
+#endif
 }
 
 static bool wait_for_uhci_done(workspace_t *ws)
@@ -367,6 +388,7 @@ static bool get_data_request(const usb_hcd_t *hcd, const usb_ep_t *ep, const usb
 
 static void poll_keyboards(const usb_hcd_t *hcd)
 {
+#if 0
     workspace_t *ws = (workspace_t *)hcd->ws;
     uint16_t io_base = ws->io_base;
 
@@ -398,13 +420,14 @@ static void poll_keyboards(const usb_hcd_t *hcd)
             write32(&kbd_qh->qe_link_ptr, (uintptr_t)kbd_td | UHCI_LP_TYPE_TD);
         }
     }
+#endif
 }
 
 //------------------------------------------------------------------------------
 // Driver Method Table
 //------------------------------------------------------------------------------
 
-static const hcd_methods_t methods = {
+const hcd_methods_t methods2 = {
     .reset_root_hub_port = reset_root_hub_port,
     .allocate_slot       = NULL,
     .release_slot        = NULL,
@@ -434,6 +457,7 @@ bool uhci_reset(int bus, int dev, int func, uint16_t io_base)
 
 bool uhci_probe(uint16_t io_base, usb_hcd_t *hcd)
 {
+#if 0
     // Record the heap state to allow us to free memory.
     uintptr_t initial_heap_mark = heap_mark(HEAP_TYPE_LM_1);
 
@@ -465,7 +489,7 @@ bool uhci_probe(uint16_t io_base, usb_hcd_t *hcd)
     }
 
     // Initialise the driver object for this controller.
-    hcd->methods = &methods;
+    hcd->methods = &methods2;
     hcd->ws      = &ws->base_ws;
 
     // Initialise the host controller.
@@ -473,7 +497,7 @@ bool uhci_probe(uint16_t io_base, usb_hcd_t *hcd)
     outw(0,                 UHCI_FRNUM);
     outl(fl_addr,           UHCI_FLBASE);
     outb(UHCI_SOF_DEFAULT,  UHCI_SOF);
-    if (!start_host_controller(io_base)) {
+    if (!start_host_controller2(io_base)) {
         goto no_keyboards_found;
     }
 
@@ -578,5 +602,6 @@ bool uhci_probe(uint16_t io_base, usb_hcd_t *hcd)
 
 no_keyboards_found:
     heap_rewind(HEAP_TYPE_LM_1, initial_heap_mark);
+#endif
     return false;
 }

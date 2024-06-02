@@ -21,6 +21,7 @@ cpuid_info_t cpuid_info;
 
 void cpuid_init(void)
 {
+#if 0
     uint32_t reg[4];
     char *p, *q;
 
@@ -227,6 +228,7 @@ void cpuid_init(void)
       default:
         break;
     }
+#endif
 }
 
 core_type_t get_ap_hybrid_type(void)

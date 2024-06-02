@@ -27,8 +27,8 @@ unsigned short smbusbase = 0;
 uint32_t smbus_id = 0;
 static uint16_t extra_initial_sleep_for_smb_transaction = 0;
 
-static int8_t spd_page = -1;
-static int8_t last_adr = -1;
+int8_t spd_page = -1;
+int8_t last_adr = -1;
 
 // Functions Prototypes
 static void read_sku(char *sku, uint8_t slot_idx, uint16_t offset, uint8_t max_len);
@@ -53,11 +53,11 @@ static bool fch_zen_get_smb(void);
 static bool piix4_get_smb(uint8_t address);
 static bool ich5_get_smb(void);
 static bool ali_get_smb(uint8_t address);
-static uint8_t ich5_process(void);
-static uint8_t ich5_read_spd_byte(uint8_t adr, uint16_t cmd);
-static uint8_t nf_read_spd_byte(uint8_t smbus_adr, uint8_t spd_adr);
-static uint8_t ali_m1563_read_spd_byte(uint8_t smbus_adr, uint8_t spd_adr);
-static uint8_t ali_m1543_read_spd_byte(uint8_t smbus_adr, uint8_t spd_adr);
+uint8_t ich5_process(void);
+uint8_t ich5_read_spd_byte(uint8_t adr, uint16_t cmd);
+uint8_t nf_read_spd_byte(uint8_t smbus_adr, uint8_t spd_adr);
+uint8_t ali_m1563_read_spd_byte(uint8_t smbus_adr, uint8_t spd_adr);
+uint8_t ali_m1543_read_spd_byte(uint8_t smbus_adr, uint8_t spd_adr);
 
 static inline uint8_t bcd_to_ui8(uint8_t bcd)
 {
@@ -1340,6 +1340,8 @@ static bool piix4_get_smb(uint8_t address)
 
 static bool ich5_get_smb(void)
 {
+  assert(0);
+#if 0
     uint16_t x;
 
     // Enable SMBus IO Space if disabled
@@ -1364,6 +1366,7 @@ static bool ich5_get_smb(void)
     usleep(1000);
 
     return (smbusbase != 0);
+#endif
 }
 
 // --------------------
@@ -1372,6 +1375,8 @@ static bool ich5_get_smb(void)
 
 static bool amd_sb_get_smb(void)
 {
+  assert(0);
+#if 0
     uint8_t rev_id;
     uint16_t pm_reg;
 
@@ -1397,10 +1402,13 @@ static bool amd_sb_get_smb(void)
     }
 
     return false;
+#endif
 }
 
 static bool fch_zen_get_smb(void)
 {
+  assert(0);
+#if 0
     uint16_t pm_reg;
 
     __outb(AMD_PM_INDEX + 1, AMD_INDEX_IO_PORT);
@@ -1425,6 +1433,7 @@ static bool fch_zen_get_smb(void)
     }
 
     return false;
+#endif
 }
 
 // -----------------------
@@ -1487,6 +1496,8 @@ static bool ali_get_smb(uint8_t address)
 
 static uint8_t get_spd(uint8_t slot_idx, uint16_t spd_adr)
 {
+  assert(0);
+#if 0
     switch ((smbus_id >> 16) & 0xFFFF) {
       case PCI_VID_ALI:
         if ((smbus_id & 0xFFFF) == 0x7101)
@@ -1498,6 +1509,7 @@ static uint8_t get_spd(uint8_t slot_idx, uint16_t spd_adr)
       default:
         return ich5_read_spd_byte(slot_idx, spd_adr);
     }
+#endif
 }
 
 /*************************************************************************************
@@ -1508,8 +1520,10 @@ static uint8_t get_spd(uint8_t slot_idx, uint16_t spd_adr)
 /                /!\  Your RAM modules will not work anymore  /!\
 / *************************************************************************************/
 
-static uint8_t ich5_read_spd_byte(uint8_t smbus_adr, uint16_t spd_adr)
+uint8_t ich5_read_spd_byte(uint8_t smbus_adr, uint16_t spd_adr)
 {
+  assert(0);
+#if 0
     smbus_adr += 0x50;
 
     if (dmi_memory_device->type == DMI_DDR4) {
@@ -1561,10 +1575,13 @@ static uint8_t ich5_read_spd_byte(uint8_t smbus_adr, uint16_t spd_adr)
     } else {
         return 0xFF;
     }
+#endif
 }
 
-static uint8_t ich5_process(void)
+uint8_t ich5_process(void)
 {
+  assert(0);
+#if 0
     uint8_t status;
     uint16_t timeout = 0;
 
@@ -1603,10 +1620,13 @@ static uint8_t ich5_process(void)
     }
 
     return 0;
+#endif
 }
 
-static uint8_t nf_read_spd_byte(uint8_t smbus_adr, uint8_t spd_adr)
+uint8_t nf_read_spd_byte(uint8_t smbus_adr, uint8_t spd_adr)
 {
+  assert(0);
+#if 0
     int i;
 
     smbus_adr += 0x50;
@@ -1634,10 +1654,13 @@ static uint8_t nf_read_spd_byte(uint8_t smbus_adr, uint8_t spd_adr)
     }
 
     return __inb(NVSMBDAT(0));
+#endif
 }
 
-static uint8_t ali_m1563_read_spd_byte(uint8_t smbus_adr, uint8_t spd_adr)
+uint8_t ali_m1563_read_spd_byte(uint8_t smbus_adr, uint8_t spd_adr)
 {
+  assert(0);
+#if 0
     int i;
 
     smbus_adr += 0x50;
@@ -1669,10 +1692,13 @@ static uint8_t ali_m1563_read_spd_byte(uint8_t smbus_adr, uint8_t spd_adr)
     }
 
     return __inb(SMBHSTDAT0);
+#endif
 }
 
-static uint8_t ali_m1543_read_spd_byte(uint8_t smbus_adr, uint8_t spd_adr)
+uint8_t ali_m1543_read_spd_byte(uint8_t smbus_adr, uint8_t spd_adr)
 {
+  assert(0);
+#if 0
     int i;
 
     smbus_adr += 0x50;
@@ -1704,4 +1730,5 @@ static uint8_t ali_m1543_read_spd_byte(uint8_t smbus_adr, uint8_t spd_adr)
     }
 
     return __inb(ALI_OLD_SMBHSTDAT0);
+#endif
 }

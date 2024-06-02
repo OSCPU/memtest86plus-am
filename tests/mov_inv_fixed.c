@@ -23,7 +23,7 @@
 #include "test_funcs.h"
 #include "test_helper.h"
 
-#define HAND_OPTIMISED  1   // Use hand-optimised assembler code for performance.
+#define HAND_OPTIMISED  0   // Use hand-optimised assembler code for performance.
 
 //------------------------------------------------------------------------------
 // Public Functions

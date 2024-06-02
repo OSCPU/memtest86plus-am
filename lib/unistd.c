@@ -19,7 +19,7 @@ void usleep(unsigned int usec)
         uint64_t cycles = ((uint64_t)usec * clks_per_msec) / 1000;
         uint64_t t0 = get_tsc();
         do {
-            __builtin_ia32_pause();
+//            __builtin_ia32_pause();
         } while ((get_tsc() - t0) < cycles);
     } else {
         // This will be highly inaccurate, but should give at least the requested delay.

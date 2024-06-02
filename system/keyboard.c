@@ -12,13 +12,14 @@
 
 #include "keyboard.h"
 #include "config.h"
+#include <assert.h>
 
 //------------------------------------------------------------------------------
 // Private Variables
 //------------------------------------------------------------------------------
 
 // Convert set 1 scancodes to characters.
-static const char legacy_keymap[] = {
+const char legacy_keymap[] = {
     /* 0x00 */   0,
     /* 0x01 */ ESC,
     /* 0x02 */ '1',
@@ -249,8 +250,10 @@ char get_key(void)
         }
     }
 
-    static bool escaped = false;
+//    static bool escaped = false;
+    assert(0);
     if (keyboard_types & KT_LEGACY) {
+#if 0
         uint8_t c = inb(0x64);
         if (c & 0x01) {
             c = inb(0x60);
@@ -271,6 +274,7 @@ char get_key(void)
 
             // Ignore keys we don't recognise and key up codes
         }
+#endif
     }
 
     if (enable_tty) {

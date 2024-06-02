@@ -49,6 +49,8 @@ void get_specific_TjMax(void)
 
 void temperature_init(void)
 {
+  return;
+#if 0
     uint32_t regl, regh;
 
     if (!enable_temperature) {
@@ -75,10 +77,12 @@ void temperature_init(void)
             }
         }
     }
+#endif
 }
 
 int get_cpu_temperature(void)
 {
+#if 0
     uint32_t regl, regh;
 
     // Intel CPU
@@ -136,6 +140,6 @@ int get_cpu_temperature(void)
         rdmsr(msr_temp, regl, regh);
         return (int)(regl & 0xffffff);
     }
-
+#endif
     return 0;
 }

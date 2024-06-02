@@ -212,8 +212,11 @@ core_type_t get_ap_hybrid_type(void);
 /**
  * Executes the cpuid instruction.
  */
+#include <assert.h>
 static inline void cpuid(uint32_t op, uint32_t count, uint32_t *eax, uint32_t *ebx, uint32_t *ecx, uint32_t *edx)
 {
+  assert(0);
+#if 0
     *eax = op;
     *ecx = count;
     __asm__ __volatile__ ("cpuid"
@@ -224,6 +227,7 @@ static inline void cpuid(uint32_t op, uint32_t count, uint32_t *eax, uint32_t *e
         : "0"  (*eax),
           "2"  (*ecx)
     );
+#endif
 }
 
 #endif // CPUID_H

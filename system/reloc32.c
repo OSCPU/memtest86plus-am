@@ -69,6 +69,8 @@ typedef struct
  */
 static inline Elf32_Addr __attribute__ ((unused)) get_load_address(void)
 {
+  assert(0);
+#if 0
     Elf32_Addr addr;
     __asm__ __volatile__ (
         "leal _start@GOTOFF(%%ebx), %0"
@@ -77,6 +79,7 @@ static inline Elf32_Addr __attribute__ ((unused)) get_load_address(void)
         : "cc"
     );
     return addr;
+#endif
 }
 
 /*
@@ -86,8 +89,11 @@ static inline Elf32_Addr __attribute__ ((unused)) get_load_address(void)
  */
 static inline Elf32_Addr __attribute__ ((unused)) get_dynamic_section_offset(void)
 {
+  assert(0);
+#if 0
     register Elf32_Addr *got __asm__ ("%ebx");
     return *got;
+#endif
 }
 
 static void get_dynamic_info(Elf32_Dyn *dyn_section, Elf32_Addr load_offs, Elf32_Dyn *dyn_info[DT_NUM])

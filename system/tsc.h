@@ -12,6 +12,7 @@
 
 #include <stdint.h>
 
+#if 0
 #define rdtsc(low, high)            \
     __asm__ __volatile__("rdtsc"    \
         : "=a" (low),               \
@@ -24,6 +25,12 @@
         : /* no inputs */           \
         : "edx"                     \
     )
+#endif
+
+#include <assert.h>
+#define rdtsc(low, high) assert(0)
+#define rdtscl(low) assert(0)
+
 
 /**
  * Reads and returns the timestamp counter value.

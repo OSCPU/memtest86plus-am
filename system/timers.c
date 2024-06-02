@@ -25,6 +25,7 @@
 
 static void correct_tsc(void)
 {
+#if 0
     uint32_t start_time, end_time, run_time, counter;
     int loops = 0;
 
@@ -84,6 +85,7 @@ static void correct_tsc(void)
     if (loops >= 4 && run_time >= 50000) {
        clks_per_msec = run_time / 50;
     }
+#endif
 }
 
 //------------------------------------------------------------------------------

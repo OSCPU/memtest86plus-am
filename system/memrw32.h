@@ -20,44 +20,25 @@
  */
 static inline uint32_t read32(const volatile uint32_t *ptr)
 {
-    uint32_t val;
-    __asm__ __volatile__(
-        "movl %1, %0"
-        : "=r" (val)
-        : "m" (*ptr)
-        : "memory"
-    );
-    return val;
+  return *ptr;
 }
 
 /**
  * Writes val to the 32-bit memory location pointed to by ptr.
  */
-static inline void write32(const volatile uint32_t *ptr, uint32_t val)
+static inline void write32(volatile uint32_t *ptr, uint32_t val)
 {
-    __asm__ __volatile__(
-        "movl %1, %0"
-        :
-        : "m" (*ptr),
-          "r" (val)
-        : "memory"
-    );
+  *ptr = val;
 }
 
 /**
  * Writes val to the 32-bit memory location pointed to by ptr. Reads it
  * back (and discards it) to ensure the write is complete.
  */
-static inline void flush32(const volatile uint32_t *ptr, uint32_t val)
+static inline void flush32(volatile uint32_t *ptr, uint32_t val)
 {
-    __asm__ __volatile__(
-        "movl %1, %0\n"
-        "movl %0, %1"
-        :
-        : "m" (*ptr),
-          "r" (val)
-        : "memory"
-    );
+  write32(ptr, val);
+  read32(ptr);
 }
 
 #endif // MEMRW32_H

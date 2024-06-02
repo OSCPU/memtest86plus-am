@@ -898,7 +898,7 @@ int smp_start(cpu_state_t cpu_state[MAX_CPUS])
 void smp_send_nmi(int cpu_num)
 {
     while (apic_read(APIC_REG_ICRLO) & APIC_ICR_BUSY) {
-        __builtin_ia32_pause();
+//        __builtin_ia32_pause();
     }
     send_ipi(cpu_num_to_apic_id[cpu_num], 0, 0, APIC_DELMODE_NMI, 0);
 }

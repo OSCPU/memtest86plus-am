@@ -23,6 +23,7 @@
 
 #include "pci.h"
 #include "unistd.h"
+#include <assert.h>
 
 //------------------------------------------------------------------------------
 // Constants
@@ -52,7 +53,7 @@ static pci_config_type_t pci_config_type = PCI_CONFIG_TYPE_NONE;
 // Private Functions
 //------------------------------------------------------------------------------
 
-static bool pci_sanity_check(void)
+bool pci_sanity_check(void)
 {
     // Do a trivial check to make certain we can see a host bridge.
     // There are reportedly some buggy chipsets from Intel and
@@ -63,6 +64,8 @@ static bool pci_sanity_check(void)
 
 void probe_config_type(void)
 {
+  return;
+#if 0
     uint8_t  tmpCFB;
     uint32_t tmpCF8;
 
@@ -97,6 +100,7 @@ void probe_config_type(void)
 
     // Nothing worked.
     pci_config_type = PCI_CONFIG_TYPE_NONE;
+#endif
 }
 
 static void set_pci_config1_addr(int bus, int dev, int func, int reg)
@@ -254,17 +258,22 @@ void pci_config_write32(int bus, int dev, int func, int reg, uint32_t value)
 
 void lpc_outb(uint8_t cmd, uint8_t data)
 {
+#if 0
     outb(cmd, 0x2E);
     usleep(100);
     outb(data, 0x2F);
     usleep(100);
+#endif
 }
 
 uint8_t lpc_inb(uint8_t reg)
 {
+  assert(0);
+#if 0
     outb(reg, 0x2E);
     usleep(100);
     return inb(0x2F);
+#endif
 }
 
 // ---------------------------------------

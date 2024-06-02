@@ -348,7 +348,7 @@ typedef struct {
 // Private Functions
 //------------------------------------------------------------------------------
 
-static size_t round_up(size_t size, size_t alignment)
+size_t round_up(size_t size, size_t alignment)
 {
     return (size + alignment - 1) & ~(alignment - 1);
 }
@@ -356,7 +356,7 @@ static size_t round_up(size_t size, size_t alignment)
 // The read64 and write64 functions provided here provide compatibility with both
 // 32-bit and 64-bit hosts and with both 32-bit and 64-bit XHCI controllers.
 
-static uint64_t read64(const volatile uint64_t *ptr)
+uint64_t read64(const volatile uint64_t *ptr)
 {
     uint32_t val_l = read32((const volatile uint32_t *)ptr + 0);
     uint32_t val_h = read32((const volatile uint32_t *)ptr + 1);
@@ -370,7 +370,7 @@ static void write64(volatile uint64_t *ptr, uint64_t val)
 }
 
 #ifdef QEMU_WORKAROUND
-static void memcpy32(void *dst, const void *src, size_t size)
+void memcpy32(void *dst, const void *src, size_t size)
 {
     uint32_t *dst_word = (uint32_t *)dst;
     uint32_t *src_word = (uint32_t *)src;
@@ -381,7 +381,7 @@ static void memcpy32(void *dst, const void *src, size_t size)
 }
 #endif
 
-static usb_speed_t xhci_to_usb_speed(int xhci_speed)
+usb_speed_t xhci_to_usb_speed(int xhci_speed)
 {
     switch (xhci_speed) {
       case XHCI_LOW_SPEED:
@@ -426,7 +426,7 @@ static int xhci_ep_interval(int config_interval, usb_speed_t device_speed)
     }
 }
 
-static bool reset_host_controller(xhci_op_regs_t *op_regs)
+bool reset_host_controller(xhci_op_regs_t *op_regs)
 {
     write32(&op_regs->usb_command, read32(&op_regs->usb_command) | XHCI_USBCMD_HCRST);
 
@@ -436,30 +436,30 @@ static bool reset_host_controller(xhci_op_regs_t *op_regs)
         && wait_until_clr(&op_regs->usb_status,  XHCI_USBSTS_CNR,   1000*MILLISEC);
 }
 
-static bool start_host_controller(xhci_op_regs_t *op_regs)
+bool start_host_controller(xhci_op_regs_t *op_regs)
 {
     write32(&op_regs->usb_command, read32(&op_regs->usb_command) | XHCI_USBCMD_R_S);
     return wait_until_clr(&op_regs->usb_status, XHCI_USBSTS_HCH, 1000*MILLISEC);
 }
 
-static bool halt_host_controller(xhci_op_regs_t *op_regs)
+bool halt_host_controller(xhci_op_regs_t *op_regs)
 {
     write32(&op_regs->usb_command, read32(&op_regs->usb_command) & ~XHCI_USBCMD_R_S);
     return wait_until_set(&op_regs->usb_status, XHCI_USBSTS_HCH, 1000*MILLISEC);
 }
 
-static int get_xhci_device_speed(xhci_op_regs_t *op_regs, int port_idx)
+int get_xhci_device_speed(xhci_op_regs_t *op_regs, int port_idx)
 {
     return (read32(&op_regs->port_regs[port_idx].sc) & XHCI_PORT_SC_PS) >> XHCI_PORT_SC_PS_OFFSET;
 }
 
-static bool reset_xhci_port(xhci_op_regs_t *op_regs, int port_idx)
+bool reset_xhci_port(xhci_op_regs_t *op_regs, int port_idx)
 {
     write32(&op_regs->port_regs[port_idx].sc, XHCI_PORT_SC_PP | XHCI_PORT_SC_PR | XHCI_PORT_SC_PRC);
     return wait_until_set(&op_regs->port_regs[port_idx].sc, XHCI_PORT_SC_PRC, 1000*MILLISEC);
 }
 
-static void disable_xhci_port(xhci_op_regs_t *op_regs, int port_idx)
+void disable_xhci_port(xhci_op_regs_t *op_regs, int port_idx)
 {
     write32(&op_regs->port_regs[port_idx].sc, XHCI_PORT_SC_PP | XHCI_PORT_SC_PED);
     (void)wait_until_clr(&op_regs->port_regs[port_idx].sc, XHCI_PORT_SC_PED, 1000*MILLISEC);
@@ -894,7 +894,7 @@ static void poll_keyboards(const usb_hcd_t *hcd)
 // Driver Method Table
 //------------------------------------------------------------------------------
 
-static const hcd_methods_t methods = {
+const hcd_methods_t methods = {
     .reset_root_hub_port = reset_root_hub_port,
     .allocate_slot       = allocate_slot,
     .release_slot        = release_slot,
@@ -912,6 +912,7 @@ static const hcd_methods_t methods = {
 
 bool xhci_reset(uintptr_t base_addr)
 {
+#if 0
     xhci_cap_regs_t *cap_regs = (xhci_cap_regs_t *)base_addr;
 
 #ifdef QEMU_WORKAROUND
@@ -951,12 +952,13 @@ bool xhci_reset(uintptr_t base_addr)
     // Ensure the controller is halted and then reset it.
     if (!halt_host_controller(op_regs)) return false;
     if (!reset_host_controller(op_regs)) return false;
-
+#endif
     return true;
 }
 
 bool xhci_probe(uintptr_t base_addr, usb_hcd_t *hcd)
 {
+#if 0
     uint8_t port_type[XHCI_MAX_PORTS];
 
     memset(port_type, 0, sizeof(port_type));
@@ -1199,5 +1201,6 @@ bool xhci_probe(uintptr_t base_addr, usb_hcd_t *hcd)
 no_keyboards_found:
     heap_rewind(HEAP_TYPE_LM_1, initial_lm_heap_mark);
     heap_rewind(HEAP_TYPE_HM_1, initial_hm_heap_mark);
+#endif
     return false;
 }

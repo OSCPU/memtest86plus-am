@@ -16,6 +16,7 @@
 #include "cpuid.h"
 #include "config.h"
 #include "temperature.h"
+#include <assert.h>
 
 quirk_t quirk;
 
@@ -25,6 +26,8 @@ quirk_t quirk;
 
 static void asus_tusl2_configure_mux(void)
 {
+  assert(0);
+#if 0
     uint8_t muxreg;
 
     // Enter ASB100 Config Mode
@@ -46,6 +49,7 @@ static void asus_tusl2_configure_mux(void)
 
     // Leave Config Mode
     outb(0xAA, 0x2E);
+#endif
 }
 
 static void get_m1541_l2_cache_size(void)

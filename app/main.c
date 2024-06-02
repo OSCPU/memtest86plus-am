@@ -568,7 +568,7 @@ static void select_next_master(void)
 static Context *simple_trap(Event ev, Context *ctx) {
   switch (ev.event) {
     case EVENT_ERROR:
-      printf("ERROR@pc = %p: %s\n", ctx->eip, ev.msg);
+//      printf("ERROR@pc = %p: %s\n", ctx->eip, ev.msg);
       assert(0);
     default:;
   }

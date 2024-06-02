@@ -12,6 +12,7 @@
 
 #include "config.h"
 #include "display.h"
+#include <assert.h>
 
 static struct serial_port console_serial;
 
@@ -37,6 +38,8 @@ static void serial_write_reg(struct serial_port *port, uint16_t reg, uint8_t val
 
 static uint8_t serial_read_reg(struct serial_port *port, uint16_t reg)
 {
+  assert(0);
+#if 0
     union {
         uintptr_t addr;
         uint8_t *ptr;
@@ -49,6 +52,7 @@ static uint8_t serial_read_reg(struct serial_port *port, uint16_t reg)
     } else {
         return __inb(reg_walker.addr);
     }
+#endif
 }
 
 static void serial_wait_for_xmit(struct serial_port *port)

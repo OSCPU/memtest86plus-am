@@ -15,6 +15,7 @@
  */
 static inline void cache_off(void)
 {
+#if 0
 #ifdef __x86_64__
     __asm__ __volatile__ ("\t"
         "movq   %%cr0, %%rax        \n\t"
@@ -36,6 +37,7 @@ static inline void cache_off(void)
         : "eax", "memory"
     );
 #endif
+#endif
 }
 
 /**
@@ -43,6 +45,7 @@ static inline void cache_off(void)
  */
 static inline void cache_on(void)
 {
+#if 0
 #ifdef __x86_64__
     __asm__ __volatile__ ("\t"
         "movq   %%cr0, %%rax        \n\t"
@@ -62,6 +65,7 @@ static inline void cache_on(void)
         : "eax", "memory"
     );
 #endif
+#endif
 }
 
 /**
@@ -69,12 +73,14 @@ static inline void cache_on(void)
  */
 static inline void cache_flush(void)
 {
+#if 0
     __asm__ __volatile__ ("\t"
         "wbinvd\n"
         : /* no outputs */
         : /* no inputs */
         : "memory"
     );
+#endif
 }
 
 #endif // CACHE_H

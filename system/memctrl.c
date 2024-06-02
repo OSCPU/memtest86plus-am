@@ -12,7 +12,7 @@
 #include "cpuinfo.h"
 
 #include "memctrl.h"
-#include "imc/imc.h"
+//#include "imc/imc.h"
 
 #include "display.h"
 
@@ -26,6 +26,8 @@ ecc_info_t ecc_status = {false, ECC_ERR_NONE, 0, 0, 0, 0};
 
 void memctrl_init(void)
 {
+  return;
+#if 0
     ecc_status.ecc_enabled = false;
 
     if (!enable_mch_read) {
@@ -65,6 +67,7 @@ void memctrl_init(void)
     if (imc.tCL == 0 || imc.tRCD == 0 || imc.tRP == 0 || imc.tRCD == 0) {
         imc.freq = 0;
     }
+#endif
 }
 
 void memctrl_poll_ecc(void)
@@ -78,7 +81,7 @@ void memctrl_poll_ecc(void)
       case IMC_K19_VRM:
       case IMC_K19_RPL:
       case IMC_K19_RBT:
-        poll_ecc_amd_zen(true);
+//        poll_ecc_amd_zen(true);
         break;
       default:
         break;

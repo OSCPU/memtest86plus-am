@@ -20,6 +20,7 @@
 #include "display.h"
 
 #include "interrupt.h"
+#include <assert.h>
 
 //------------------------------------------------------------------------------
 // Constants
@@ -56,7 +57,7 @@
 #define ADR_DIGITS  "8"
 #endif
 
-static const char codes[][13] = {
+const char codes[][13] = {
     "Divide by 0",
     "Debug",
     "NMI",
@@ -121,6 +122,8 @@ struct trap_regs {
 
 void interrupt(struct trap_regs *trap_regs)
 {
+  assert(0);
+#if 0
     // Get the page fault address.
     uintptr_t address = 0;
     if (trap_regs->vect == INT_PAGEFLT) {
@@ -239,4 +242,5 @@ void interrupt(struct trap_regs *trap_regs)
 
     while (get_key() == 0) { }
     reboot();
+#endif
 }

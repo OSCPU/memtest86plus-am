@@ -19,12 +19,13 @@
 #include "unistd.h"
 
 #include "hwctrl.h"
+#include <assert.h>
 
 //------------------------------------------------------------------------------
 // Private Variables
 //------------------------------------------------------------------------------
 
-static efi_runtime_services_t   *efi_rs_table = NULL;
+efi_runtime_services_t   *efi_rs_table = NULL;
 
 //------------------------------------------------------------------------------
 // Public Functions
@@ -56,6 +57,8 @@ void hwctrl_init(void)
 
 void reboot(void)
 {
+  halt(1);
+#if 0
     // Use cf9 method as first try
     uint8_t cf9 = inb(0xcf9) & ~6;
     outb(cf9|2, 0xcf9); // Request hard reset
@@ -77,20 +80,22 @@ void reboot(void)
         // In last resort, (very) obsolete reboot method using BIOS
         *((uint16_t *)0x472) = 0x1234;
     }
+#endif
 }
 
 void floppy_off()
 {
     // Stop the floppy motor.
-    outb(0x8, 0x3f2);
+//    outb(0x8, 0x3f2);
 }
 
 void cursor_off()
 {
+  assert(0);
     // Set HW cursor off screen.
-    outb(0x0f, 0x3d4);
-    outb(0xff, 0x3d5);
-
-    outb(0x0e, 0x3d4);
-    outb(0xff, 0x3d5);
+//    outb(0x0f, 0x3d4);
+//    outb(0xff, 0x3d5);
+//
+//    outb(0x0e, 0x3d4);
+//    outb(0xff, 0x3d5);
 }
