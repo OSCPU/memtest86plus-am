@@ -10,6 +10,8 @@
  * Copyright (C) 2004-2023 Sam Demeulemeester.
  */
 
+#include <stdbool.h>
+
 #define SERIAL_DEFAULT_BITS     8
 #define SERIAL_DEFAULT_PARITY   0
 
@@ -180,5 +182,8 @@ void tty_print(int y, int x, const char *p);
 void tty_send_region(int start_row, int start_col, int end_row, int end_col);
 
 char tty_get_key(void);
+char get_key(void);
+
+#define ESC 27
 
 #endif /* _SERIAL_REG_H */

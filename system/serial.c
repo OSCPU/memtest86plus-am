@@ -1,18 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0
 // Copyright (C) 2004-2023 Sam Demeulemeester
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-
-#include "io.h"
-#include "string.h"
+#include "common.h"
 #include "serial.h"
-#include "unistd.h"
-
-#include "config.h"
 #include "display.h"
-#include <assert.h>
 
 static struct serial_port console_serial;
 
@@ -20,51 +11,12 @@ static struct serial_port console_serial;
 // Private Functions
 //------------------------------------------------------------------------------
 
-static void serial_write_reg(struct serial_port *port, uint16_t reg, uint8_t val)
-{
-    union {
-        uintptr_t addr;
-        uint8_t *ptr;
-    } reg_walker;
-
-    reg_walker.addr = port->base_addr + reg * port->reg_width;
-
-    if (port->is_mmio) {
-        *reg_walker.ptr = val;
-    } else {
-        __outb(val, reg_walker.addr);
-    }
-}
-
 static uint8_t serial_read_reg(struct serial_port *port, uint16_t reg)
 {
   assert(0);
-#if 0
-    union {
-        uintptr_t addr;
-        uint8_t *ptr;
-    } reg_walker;
-
-    reg_walker.addr = port->base_addr + reg * port->reg_width;
-
-    if (port->is_mmio) {
-        return *reg_walker.ptr;
-    } else {
-        return __inb(reg_walker.addr);
-    }
-#endif
 }
 
-static void serial_wait_for_xmit(struct serial_port *port)
-{
-    uint8_t lsr;
-
-    do {
-        lsr = serial_read_reg(port, UART_LSR);
-    } while ((lsr & BOTH_EMPTY) != BOTH_EMPTY);
-}
-
-void serial_echo_print(const char *p)
+static void serial_echo_print(const char *p)
 {
     struct serial_port *port = &console_serial;
 
@@ -73,14 +25,10 @@ void serial_echo_print(const char *p)
     }
 
     /* Now, do each character */
-    while (*p) {
-        /* Send the character out. */
-        serial_wait_for_xmit(port);
-        serial_write_reg(port, UART_TX, *p++);
-    }
+    putstr(p);
 }
 
-void tty_goto(int y, int x)
+static void tty_goto(int y, int x)
 {
     static char s[3];
 
@@ -101,9 +49,6 @@ void tty_init(void)
         return;
     }
 
-    int uart_status, serial_div;
-    unsigned char lcr;
-
     console_serial.enable       = true;
     console_serial.base_addr    = tty_address;
     console_serial.baudrate     = tty_baud_rate;
@@ -119,33 +64,6 @@ void tty_init(void)
         console_serial.is_mmio      = false;
         console_serial.reg_width    = 1;
         console_serial.refclk       = UART_REF_CLK_IO;
-    }
-
-    /* read the Divisor Latch */
-    uart_status = serial_read_reg(&console_serial, UART_LCR);
-    serial_write_reg(&console_serial, UART_LCR, uart_status | UART_LCR_DLAB);
-    serial_read_reg(&console_serial, UART_DLM);
-    serial_read_reg(&console_serial, UART_DLL);
-    serial_write_reg(&console_serial, UART_LCR, uart_status);
-
-    /* now do hardwired init */
-    lcr = console_serial.parity | (console_serial.bits - 5);
-    serial_write_reg(&console_serial, UART_LCR, lcr);               /* No parity, 8 data bits, 1 stop */
-    serial_div = (console_serial.refclk / console_serial.baudrate) / 16;
-    serial_write_reg(&console_serial, UART_LCR, 0x80|lcr);          /* Access divisor latch */
-    serial_write_reg(&console_serial, UART_DLL, serial_div & 0xff); /* baud rate divisor */
-    serial_write_reg(&console_serial, UART_DLM, (serial_div >> 8) & 0xff);
-    serial_write_reg(&console_serial, UART_LCR, lcr);               /* Done with divisor */
-
-    /* Prior to disabling interrupts, read the LSR and RBR registers */
-    uart_status = serial_read_reg(&console_serial, UART_LSR);       /* COM? LSR */
-    uart_status = serial_read_reg(&console_serial, UART_RX);        /* COM? RBR */
-    serial_write_reg(&console_serial, UART_IER, 0x00);              /* Disable all interrupts */
-
-    /* In case of MMIO UART, set up FIFO Reg */
-    if (console_serial.is_mmio) {
-        serial_write_reg(&console_serial, UART_FCR, 0x00);
-        serial_write_reg(&console_serial, UART_FCR, (0xFF) & (UART_FCR_ENA | UART_FCR_THR));
     }
 
     tty_clear_screen();
@@ -240,4 +158,17 @@ char tty_get_key(void)
     } else {
         return 0xFF;
     }
+}
+
+char get_key(void)
+{
+    if (enable_tty) {
+        uint8_t c = tty_get_key();
+        if (c != 0xFF) {
+            if (c == 0x0D) c = '\n'; // Enter
+            return c;
+        }
+    }
+
+    return '\0';
 }

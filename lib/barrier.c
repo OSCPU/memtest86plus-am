@@ -1,14 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0
 // Copyright (C) 2020-2022 Martin Whitaker.
 
-#include <stdbool.h>
-#include <stddef.h>
+#include "common.h"
 
 #include "cpulocal.h"
-#include "smp.h"
-
-#include "assert.h"
-
 #include "barrier.h"
 
 //------------------------------------------------------------------------------
@@ -29,9 +24,7 @@ void barrier_reset(barrier_t *barrier, int num_threads)
     barrier->count       = num_threads;
 
     local_flag_t *waiting_flags = local_flags(barrier->flag_num);
-    for (int cpu_num = 0; cpu_num < num_available_cpus; cpu_num++) {
-        waiting_flags[cpu_num].flag = false;
-    }
+    waiting_flags[0].flag = false;
 }
 
 void barrier_spin_wait(barrier_t *barrier)
@@ -40,7 +33,7 @@ void barrier_spin_wait(barrier_t *barrier)
         return;
     }
     local_flag_t *waiting_flags = local_flags(barrier->flag_num);
-    int my_cpu = smp_my_cpu_num();
+    int my_cpu = cpu_current();
     waiting_flags[my_cpu].flag = true;
     assert(0);
 #if 0
@@ -56,9 +49,7 @@ void barrier_spin_wait(barrier_t *barrier)
     // check if a CPU core is actually waiting - just clear all the flags.
     barrier->count = barrier->num_threads;
     __sync_synchronize();
-    for (int cpu_num = 0; cpu_num < num_available_cpus; cpu_num++) {
-        waiting_flags[cpu_num].flag = false;
-    }
+    waiting_flags[0].flag = false;
 }
 
 void barrier_halt_wait(barrier_t *barrier)
@@ -67,7 +58,7 @@ void barrier_halt_wait(barrier_t *barrier)
         return;
     }
     local_flag_t *waiting_flags = local_flags(barrier->flag_num);
-    int my_cpu = smp_my_cpu_num();
+    int my_cpu = cpu_current();
     waiting_flags[my_cpu].flag = true;
     //
     // There is a small window of opportunity for the wakeup signal to arrive
@@ -99,11 +90,8 @@ void barrier_halt_wait(barrier_t *barrier)
     barrier->count = barrier->num_threads;
     __sync_synchronize();
     waiting_flags[my_cpu].flag = false;
-    for (int cpu_num = 0; cpu_num < num_available_cpus; cpu_num++) {
-        if (waiting_flags[cpu_num].flag) {
-            waiting_flags[cpu_num].flag = false;
-            smp_send_nmi(cpu_num);
-        }
+    if (waiting_flags[0].flag) {
+      waiting_flags[0].flag = false;
     }
 //end:
     return;

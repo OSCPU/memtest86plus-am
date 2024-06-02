@@ -1,15 +1,10 @@
 // SPDX-License-Identifier: GPL-2.0
 // Copyright (C) 2020-2021 Martin Whitaker.
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "common.h"
 
 #include "screen.h"
-
-#include "string.h"
-
 #include "print.h"
-#include <am.h>
 
 //------------------------------------------------------------------------------
 // Constants

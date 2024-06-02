@@ -14,10 +14,8 @@
 #include <stdint.h>
 
 #include "pmem.h"
-#include "smp.h"
-
+#include "config.h"
 #include "barrier.h"
-#include "spinlock.h"
 
 /**
  * A mapping from a CPU core number to the index number of the memory chunk
@@ -26,10 +24,6 @@
  * enabled).
  */
 extern uint8_t chunk_index[MAX_CPUS];
-/**
- * An array where the count of used CPUs in the current proximity domain.
- */
-extern uint8_t used_cpus_in_proximity_domain[MAX_PROXIMITY_DOMAINS];
 
  /*
   * The number of CPU cores being used for the current test. This is always

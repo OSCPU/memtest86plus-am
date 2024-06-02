@@ -13,8 +13,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "smp.h"
-#include "cpuid.h"
+#define MAX_CPUS 8
 
 typedef enum {
     PAR,
@@ -44,9 +43,6 @@ extern cpu_mode_t   cpu_mode;
 
 extern error_mode_t error_mode;
 
-extern cpu_state_t  cpu_state[MAX_CPUS];
-
-extern core_type_t  hybrid_core_type[MAX_CPUS];
 extern bool         exclude_ecores;
 
 extern bool         smp_enabled;

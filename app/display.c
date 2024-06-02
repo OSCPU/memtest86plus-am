@@ -2,39 +2,21 @@
 // Copyright (C) 2020-2022 Martin Whitaker.
 // Copyright (C) 2004-2023 Sam Demeulemeester.
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "common.h"
 
-#include "cpuid.h"
 #include "cpuinfo.h"
-#include "hwctrl.h"
-#include "io.h"
-#include "keyboard.h"
-#include "memctrl.h"
 #include "serial.h"
-#include "pmem.h"
-#include "smbios.h"
-#include "smbus.h"
-#include "temperature.h"
 #include "tsc.h"
-
-#include "barrier.h"
-#include "spinlock.h"
-
-#include "config.h"
 #include "error.h"
-//#include "build_version.h"
-
-#define MT_VERSION "7.00"
-#define GIT_HASH "3f86696"
-
 #include "tests.h"
-
 #include "display.h"
 
 //------------------------------------------------------------------------------
 // Constants
 //------------------------------------------------------------------------------
+
+#define MT_VERSION "7.00"
+#define GIT_HASH "3f86696"
 
 #define POP_STAT_R       12
 #define POP_STAT_C       18
@@ -76,7 +58,7 @@ static uint64_t next_spin_time = 0; // TSC time stamp
 static int prev_sec = -1;               // previous second
 static bool timed_update_done = false;  // update cycle status
 
-bool big_status_displayed = false;
+static bool big_status_displayed = false;
 static uint16_t popup_status_save_buffer[POP_STAT_W * POP_STAT_H];
 
 //------------------------------------------------------------------------------
@@ -95,8 +77,6 @@ display_mode_t display_mode = DISPLAY_MODE_NA;
 
 void display_init(void)
 {
-    cursor_off();
-
     clear_screen();
 
     /* The commented horizontal lines provide visual cue for where and how
@@ -117,14 +97,10 @@ void display_init(void)
     prints(3, 0, "L2 Cache:   N/A             | Test #");
     prints(4, 0, "L3 Cache:   N/A             | Testing:");
     prints(5, 0, "Memory  :   N/A             | Pattern:");
-//  prints(6, 0, "--------------------------------------------------------------------------------");
+    prints(6, 0, "--------------------------------------------------------------------------------");
     prints(7, 0, "CPU:                      SMP: N/A        | Time:           Status: Init.");
     prints(8, 0, "Using:                                    | Pass:           Errors:");
-//  prints(9, 0, "--------------------------------------------------------------------------------");
-
-    if (ecc_status.ecc_enabled) {
-        prints(8, 57, "Err:        ECC:");
-    }
+    prints(9, 0, "--------------------------------------------------------------------------------");
 
     for (int i = 0;i < 80; i++) {
         print_char(6, i, 0xc4);
@@ -154,9 +130,6 @@ void display_init(void)
     set_foreground_colour(WHITE);
     set_background_colour(BLUE);
 
-    if (cpu_model) {
-        display_cpu_model(cpu_model);
-    }
     if (clks_per_msec) {
         display_cpu_clk((int)(clks_per_msec / 1000));
     }
@@ -192,99 +165,19 @@ void display_init(void)
 void display_cpu_topology(void)
 {
     extern int num_enabled_cpus;
-    int num_cpu_sockets = 1;
 
     // Display Thread Count and Thread Dispatch Mode
     if (smp_enabled) {
-        if (cpuid_info.topology.is_hybrid && cpuid_info.topology.ecore_count > 0 && exclude_ecores) {
-            display_threading(num_enabled_cpus - cpuid_info.topology.ecore_count, cpu_mode_str[cpu_mode]);
-        } else {
-            display_threading(num_enabled_cpus, cpu_mode_str[cpu_mode]);
-        }
+      display_threading(num_enabled_cpus, cpu_mode_str[cpu_mode]);
     } else {
-        display_threading_disabled();
+      display_threading_disabled();
     }
-
-    // If topology failed, assume topology according to APIC
-    if (cpuid_info.topology.core_count <= 0) {
-
-        cpuid_info.topology.core_count = num_enabled_cpus;
-        cpuid_info.topology.thread_count = num_enabled_cpus;
-
-        if(cpuid_info.flags.htt && num_enabled_cpus >= 2 && num_enabled_cpus % 2 == 0) {
-            cpuid_info.topology.core_count /= 2;
-        }
-    }
-
-    // Compute number of sockets according to individual CPU core count
-    if (num_enabled_cpus > cpuid_info.topology.thread_count &&
-        num_enabled_cpus % cpuid_info.topology.thread_count == 0) {
-        num_cpu_sockets  = num_enabled_cpus / cpuid_info.topology.thread_count;
-    }
-
-    // Display P/E-Core count for Hybrid CPUs.
-    if (cpuid_info.topology.is_hybrid) {
-        if (cpuid_info.topology.pcore_count > 1) {
-
-            if (cpuid_info.flags.htt &&
-                (cpuid_info.topology.thread_count - cpuid_info.topology.ecore_count) == cpuid_info.topology.pcore_count) {
-                    cpuid_info.topology.pcore_count /= 2;
-            }
-
-            display_cpu_topo_hybrid(cpuid_info.topology.pcore_count,
-                                    cpuid_info.topology.ecore_count,
-                                    cpuid_info.topology.thread_count);
-        } else {
-            display_cpu_topo_hybrid_short(cpuid_info.topology.thread_count);
-        }
-        return;
-    }
-
-    // Condensed display for multi-socket motherboard
-    if (num_cpu_sockets > 1) {
-        display_cpu_topo_multi_socket(num_cpu_sockets,
-                                      num_cpu_sockets * cpuid_info.topology.core_count,
-                                      num_cpu_sockets * cpuid_info.topology.thread_count);
-        return;
-    }
-
-    if (cpuid_info.topology.thread_count < 100) {
-        display_cpu_topo(cpuid_info.topology.core_count,
-                         cpuid_info.topology.thread_count);
-    } else {
-        display_cpu_topo_short(cpuid_info.topology.core_count,
-                               cpuid_info.topology.thread_count);
-    }
-
 }
 
 void post_display_init(void)
 {
-    print_smbios_startup_info();
-    print_smbus_startup_info();
-
-    if (imc.freq) {
-        // Try to get RAM information from IMC
-        display_spec_mode("IMC: ");
-        if (imc.type[3] == '5') {
-            display_spec_ddr5(imc.freq, imc.type, imc.tCL, imc.tCL_dec, imc.tRCD, imc.tRP, imc.tRAS);
-        } else {
-            display_spec_ddr(imc.freq, imc.type, imc.tCL, imc.tCL_dec, imc.tRCD, imc.tRP, imc.tRAS);
-        }
-        display_mode = DISPLAY_MODE_IMC;
-    } else if (ram.freq > 0 && ram.tCL > 0) {
-        // If not available, grab max memory specs from SPD
-        display_spec_mode("RAM: ");
-        if (ram.freq <= 166) {
-            display_spec_sdr(ram.freq, ram.type, ram.tCL, ram.tRCD, ram.tRP, ram.tRAS);
-        } else {
-            display_spec_ddr(ram.freq, ram.type, ram.tCL, ram.tCL_dec, ram.tRCD, ram.tRP, ram.tRAS);
-        }
-        display_mode = DISPLAY_MODE_SPD;
-    } else {
-        // If nothing available, fallback to "Using Core" Display
-        display_mode = DISPLAY_MODE_NA;
-    }
+  // If nothing available, fallback to "Using Core" Display
+  display_mode = DISPLAY_MODE_NA;
 }
 
 void display_start_run(void)
@@ -295,14 +188,8 @@ void display_start_run(void)
 
     clear_screen_region(7, 49, 7, 57);                      // run time
 
-    if (ecc_status.ecc_enabled) {
-        clear_screen_region(8, 49, 8, 53);                  // pass number
-        clear_screen_region(8, 61, 8, 68);                  // error count
-        clear_screen_region(8, 74, 8, SCREEN_WIDTH - 1);    // ecc error count
-    } else {
-        clear_screen_region(8, 49, 8, 59);                  // pass number
-        clear_screen_region(8, 68, 8, SCREEN_WIDTH - 1);    // error count
-    }
+    clear_screen_region(8, 49, 8, 59);                  // pass number
+    clear_screen_region(8, 68, 8, SCREEN_WIDTH - 1);    // error count
 
     display_pass_count(0);
     error_count = 0;
@@ -351,36 +238,7 @@ void display_start_test(void)
 
 void display_error_count(void)
 {
-    if (ecc_status.ecc_enabled) {
-        display_err_count_with_ecc(error_count, error_count_cecc);
-    } else {
-        display_err_count_without_ecc(error_count);
-    }
-}
-
-void display_temperature(void)
-{
-    if (!enable_temperature) {
-        return;
-    }
-
-    int actual_cpu_temp = get_cpu_temperature();
-
-    if (actual_cpu_temp == 0) {
-        if (max_cpu_temp == 0) {
-            enable_temperature = false;
-        }
-        return;
-    }
-
-    if (max_cpu_temp < actual_cpu_temp ) {
-        max_cpu_temp = actual_cpu_temp;
-    }
-
-    int offset = actual_cpu_temp / 100 + max_cpu_temp / 100;
-
-    clear_screen_region(1, 18, 1, 22);
-    printk(1, 20-offset, "%2i/%2i%cC", actual_cpu_temp, max_cpu_temp, 0xF8);
+  display_err_count_without_ecc(error_count);
 }
 
 void display_big_status(bool pass)
@@ -445,8 +303,8 @@ void check_input(void)
     switch (input_key) {
       case ESC:
         clear_message_area();
-        display_notice("Rebooting...");
-        reboot();
+        display_notice("Exiting...");
+        halt(0);
         break;
       case '1':
         config_menu(false);
@@ -577,12 +435,6 @@ void do_tick(int my_cpu)
         if (err_banner_redraw && !big_status_displayed && error_count > 1) {
             display_big_status(false);
         }
-
-        // Check ECC Errors
-        memctrl_poll_ecc();
-
-        // Update temperature
-        display_temperature();
 
         // Update TTY one time every TTY_UPDATE_PERIOD second(s)
         if (enable_tty) {

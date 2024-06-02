@@ -16,7 +16,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "cpuid.h"
 #include "tsc.h"
 
 #include "display.h"
@@ -35,11 +34,7 @@ int test_mov_inv_random(int my_cpu)
     int ticks = 0;
 
     testword_t seed;
-    if (cpuid_info.flags.rdtsc) {
-        seed = get_tsc();
-    } else {
-        seed = 1 + pass_num;
-    }
+    seed = get_tsc();
     seed *= 0x87654321;
 
     if (my_cpu == master_cpu) {

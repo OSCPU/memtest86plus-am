@@ -10,24 +10,8 @@
  * Copyright (C) 2020-2022 Martin Whitaker.
  */
 
-#include <stdint.h>
+#include "common.h"
 
-#if 0
-#define rdtsc(low, high)            \
-    __asm__ __volatile__("rdtsc"    \
-        : "=a" (low),               \
-          "=d" (high)               \
-    )
-
-#define rdtscl(low)                 \
-    __asm__ __volatile__("rdtsc"    \
-        : "=a" (low)                \
-        : /* no inputs */           \
-        : "edx"                     \
-    )
-#endif
-
-#include <assert.h>
 #define rdtsc(low, high) assert(0)
 #define rdtscl(low) assert(0)
 
@@ -37,11 +21,7 @@
  */
 static inline uint64_t get_tsc(void)
 {
-    uint32_t    tl;
-    uint32_t    th;
-
-    rdtsc(tl, th);
-    return (uint64_t)th << 32 | (uint64_t)tl;
+    return io_read(AM_TIMER_UPTIME).us;
 }
 
 #endif // TSC_H

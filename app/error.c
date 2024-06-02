@@ -8,31 +8,14 @@
 // Released under version 2 of the Gnu Public License.
 // By Chris Brady
 
-#include <stdbool.h>
-#include <stdint.h>
-
+#include "common.h"
 #include <limits.h>
 
-#include "smp.h"
 #include "vmem.h"
-
 #include "badram.h"
-#include "config.h"
 #include "display.h"
-#include "test.h"
-
 #include "tests.h"
 #include "serial.h"
-#include "memctrl.h"
-#include "error.h"
-
-//------------------------------------------------------------------------------
-// Constants
-//------------------------------------------------------------------------------
-
-#ifndef USB_WORKAROUND
-#define USB_WORKAROUND 1
-#endif
 
 //------------------------------------------------------------------------------
 // Types
@@ -190,11 +173,7 @@ static void common_err(error_type_t type, uintptr_t addr, testword_t good, testw
     }
 
     if (new_address) {
-        if (type == CECC_ERROR) {
-            if ((error_count_cecc + ecc_status.count) < 999999) {
-                error_count_cecc += ecc_status.count;
-            }
-        } else {
+        if (type != CECC_ERROR) {
             if (error_count < ERROR_LIMIT) {
                 error_count++;
             }
@@ -282,13 +261,10 @@ static void common_err(error_type_t type, uintptr_t addr, testword_t good, testw
             set_foreground_colour(YELLOW);
 
             display_scrolled_message(0, " %2i   %4i   %2i   %09x%03x (%kB)",
-                                     type != CECC_ERROR ? smp_my_cpu_num() : ecc_status.core,
-                                     pass_num, test_num, page, offset, page << 2);
+                                     cpu_current(), pass_num, test_num, page, offset, page << 2);
 
             if (type == PARITY_ERROR) {
                 display_scrolled_message(41, "%s", "Parity error detected near this address");
-            } else if (type == CECC_ERROR) {
-                display_scrolled_message(41, "%s%2i", "Correctable ECC Error - CH#", ecc_status.channel);
             } else {
 #if TESTWORD_WIDTH > 32
                 display_scrolled_message(41, "%016x  %016x", good, bad);
@@ -350,23 +326,7 @@ void addr_error(testword_t *addr1, testword_t *addr2, testword_t good, testword_
 
 void data_error(testword_t *addr, testword_t good, testword_t bad, bool use_for_badram)
 {
-#if USB_WORKAROUND
-    /* Skip any errors that appear to be due to the BIOS using location
-     * 0x4e0 for USB keyboard support.  This often happens with Intel
-     * 810, 815 and 820 chipsets.  It is possible that we will skip
-     * a real error but the odds are very low.
-     */
-    if ((uintptr_t)addr == 0x4e0 || (uintptr_t)addr == 0x410) {
-        return;
-    }
-#endif
     common_err(DATA_ERROR, (uintptr_t)addr, good, bad, use_for_badram);
-}
-
-void ecc_error()
-{
-    common_err(CECC_ERROR, ecc_status.addr, 0, 0, false);
-    error_update();
 }
 
 #if REPORT_PARITY_ERRORS

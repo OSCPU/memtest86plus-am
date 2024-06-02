@@ -15,10 +15,8 @@
 #include <stdbool.h>
 
 #include "screen.h"
-
 #include "print.h"
 #include "string.h"
-
 #include "test.h"
 
 #define ROW_MESSAGE_T   10
@@ -252,8 +250,6 @@ void display_start_pass(void);
 void display_start_test(void);
 
 void display_error_count(void);
-
-void display_temperature(void);
 
 void display_big_status(bool pass);
 

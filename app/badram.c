@@ -26,8 +26,6 @@
 #include <stdint.h>
 
 #include "display.h"
-
-#include "badram.h"
 #include "memsize.h"
 
 //------------------------------------------------------------------------------

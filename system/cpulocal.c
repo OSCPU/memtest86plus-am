@@ -3,9 +3,7 @@
 
 #include <stdbool.h>
 
-#include "boot.h"
-
-#include "cpulocal.h"
+#define LOCALS_SIZE 16 /* Stack region reserved for thread-local storage */
 
 //------------------------------------------------------------------------------
 // Variables

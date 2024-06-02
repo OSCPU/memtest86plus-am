@@ -19,7 +19,7 @@
 /**
  * Test word atomic read and write functions.
  */
-#ifdef __x86_64__
+#ifdef __LP64__
 #include "memrw64.h"
 #define read_word   read64
 #define write_word  write64

@@ -10,35 +10,14 @@
 // Released under version 2 of the Gnu Public License.
 // By Chris Brady
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "common.h"
 
-#include "boot.h"
-#include "bootparams.h"
-
-#include "cpuinfo.h"
-#include "cpuid.h"
-#include "hwctrl.h"
-#include "keyboard.h"
-#include "memsize.h"
-#include "pmem.h"
 #include "serial.h"
-#include "screen.h"
-#include "smp.h"
-#include "usbhcd.h"
 #include "vmem.h"
-
 #include "read.h"
-#include "print.h"
-#include "string.h"
 #include "unistd.h"
-
 #include "display.h"
-#include "test.h"
-
 #include "tests.h"
-
-#include "config.h"
 
 //------------------------------------------------------------------------------
 // Constants
@@ -84,12 +63,9 @@ cpu_mode_t      cpu_mode = PAR;
 
 error_mode_t    error_mode = ERROR_MODE_NONE;
 
-cpu_state_t     cpu_state[MAX_CPUS];
-
-core_type_t     hybrid_core_type[MAX_CPUS];
 bool            exclude_ecores     = true;
 
-bool            smp_enabled        = true;
+bool            smp_enabled        = false;
 
 bool            enable_big_status  = true;
 bool            enable_temperature = true;
@@ -224,20 +200,10 @@ static void parse_option(const char *option, const char *params)
         } else if (strncmp(params, "badram", 7) == 0) {
             error_mode = ERROR_MODE_BADRAM;
         }
-    } else if (strncmp(option, "keyboard", 9) == 0 && params != NULL) {
-        if (strncmp(params, "legacy", 7) == 0) {
-            keyboard_types = KT_LEGACY;
-        } else if (strncmp(params, "usb", 4) == 0) {
-            keyboard_types = KT_USB;
-        } else if (strncmp(params, "both", 5) == 0) {
-            keyboard_types = KT_USB|KT_LEGACY;
-        }
     } else if (strncmp(option, "nobench", 8) == 0) {
         enable_bench = false;
     } else if (strncmp(option, "nobigstatus", 12) == 0) {
         enable_big_status = false;
-    } else if (strncmp(option, "noehci", 7) == 0) {
-        usb_init_options |= USB_IGNORE_EHCI;
     } else if (strncmp(option, "nomch", 6) == 0) {
         enable_mch_read = false;
     } else if (strncmp(option, "nopause", 8) == 0) {
@@ -260,16 +226,6 @@ static void parse_option(const char *option, const char *params)
         }
     } else if (strncmp(option, "trace", 6) == 0) {
         enable_trace = true;
-    } else if (strncmp(option, "usbdebug", 9) == 0) {
-        usb_init_options |= USB_DEBUG;
-    } else if (strncmp(option, "usbinit", 8) == 0) {
-        if (strncmp(params, "1", 2) == 0) {
-            usb_init_options |= USB_2_STEP_INIT;
-        } else if (strncmp(params, "2", 2) == 0) {
-            usb_init_options |= USB_EXTRA_RESET;
-        } else if (strncmp(params, "3", 2) == 0) {
-            usb_init_options |= USB_2_STEP_INIT|USB_EXTRA_RESET;
-        }
     }
 }
 
@@ -295,15 +251,6 @@ void parse_command_line(char *cmd_line, int cmd_line_size)
           default:
             break;
         }
-    }
-}
-
-static void display_initial_notice(void)
-{
-    if (smp_enabled) {
-        display_notice("Press <F1> to configure, <F2> to disable SMP, <Enter> to start testing");
-    } else {
-        display_notice("Press <F1> to configure, <F2> to enable SMP, <Enter> to start testing ");
     }
 }
 
@@ -696,138 +643,6 @@ static void error_mode_menu(void)
     clear_screen_region(POP_REGION);
 }
 
-static bool set_all_cpus(cpu_state_t state, int display_offset)
-{
-    clear_popup_row(POP_R+16);
-    for (int i = 1; i < num_available_cpus; i++) {
-        cpu_state[i] = state;
-        display_enabled(POP_R+12, i - display_offset, state == CPU_STATE_ENABLED);
-    }
-    return true;
-}
-
-static bool add_or_remove_cpu(bool add, int display_offset)
-{
-
-    display_input_message(POP_R+16, "Enter CPU #");
-    int n = read_value(POP_R+16, POP_LM+11, 4, 0);
-    if (n < 1 || n >= num_available_cpus) {
-        display_error_message(POP_R+16, "Invalid CPU number");
-        return false;
-    }
-    cpu_state[n] = add ? CPU_STATE_ENABLED : CPU_STATE_DISABLED;
-    display_enabled(POP_R+12, n - display_offset, add);
-    clear_popup_row(POP_R+16);
-    return true;
-}
-
-static bool add_cpu_range(int display_offset)
-{
-    display_input_message(POP_R+16, "Enter first CPU #");
-    int n1 = read_value(POP_R+16, POP_LM+17, 4, 0);
-    if (n1 < 1 || n1 >= num_available_cpus) {
-        display_error_message(POP_R+16, "Invalid CPU number");
-        return false;
-    }
-    display_input_message(POP_R+16, "Enter last CPU #");
-    int n2 = read_value(POP_R+16, POP_LM+16, 4, 0);
-    if (n2 < n1 || n2 >= num_available_cpus) {
-        display_error_message(POP_R+16, "Invalid CPU range");
-        return false;
-    }
-    for (int i = n1; i <= n2; i++) {
-        cpu_state[i] = CPU_STATE_ENABLED;
-        display_enabled(POP_R+12, i - display_offset, true);
-    }
-    clear_popup_row(POP_R+16);
-    return true;
-}
-
-static void display_cpu_selection(int display_offset)
-{
-    clear_screen_region(POP_R+11, POP_C, POP_LAST_R, POP_LAST_C);
-    display_selection_header(POP_R+10, num_available_cpus - 1, display_offset);
-    if (display_offset == 0) {
-        printc(POP_R+12, POP_LM, 'B');
-    }
-    for (int i = 1; i < num_available_cpus; i++) {
-        display_enabled(POP_R+12, i - display_offset, cpu_state[i] == CPU_STATE_ENABLED);
-    }
-}
-
-static void cpu_selection_menu(void)
-{
-    int display_offset = 0;
-
-    clear_screen_region(POP_REGION);
-    prints(POP_R+1, POP_LM, "CPU Selection:");
-    prints(POP_R+3, POP_LI, "<F1>  Clear selection");
-    prints(POP_R+4, POP_LI, "<F2>  Remove one CPU");
-    prints(POP_R+5, POP_LI, "<F3>  Add one CPU");
-    prints(POP_R+6, POP_LI, "<F4>  Add CPU range");
-    prints(POP_R+7, POP_LI, "<F5>  Add all CPUs");
-    if (cpuid_info.topology.is_hybrid) {
-        if (exclude_ecores) {
-            prints(POP_R+8, POP_LI, "<F6>  Include E-Cores");
-        } else {
-            prints(POP_R+8, POP_LI, "<F6>  Exclude E-Cores");
-        }
-    }
-    prints(POP_R+9, POP_LI, "<F10> Exit menu");
-
-    display_cpu_selection(display_offset);
-
-    bool exit_menu = false;
-    while (!exit_menu) {
-        bool changed = false;
-        switch (get_key()) {
-          case '1':
-            changed = set_all_cpus(false, display_offset);
-            break;
-          case '2':
-            changed = add_or_remove_cpu(false, display_offset);
-            break;
-          case '3':
-            changed = add_or_remove_cpu(true, display_offset);
-            break;
-          case '4':
-            changed = add_cpu_range(display_offset);
-            break;
-          case '5':
-            changed = set_all_cpus(true, display_offset);
-            break;
-          case '6':
-            exclude_ecores = !exclude_ecores;
-            prints(POP_R+8, POP_LI+6, exclude_ecores ? "Exclude" : "Include");
-            break;
-          case 'u':
-            if (display_offset >= SEL_W) {
-                display_offset -= SEL_W;
-                display_cpu_selection(display_offset);
-            }
-            break;
-          case 'd':
-            if (display_offset < (num_available_cpus - SEL_AREA)) {
-                display_offset += SEL_W;
-                display_cpu_selection(display_offset);
-            }
-            break;
-          case '0':
-            clear_popup_row(POP_R+14);
-            exit_menu = true;
-            break;
-          default:
-            usleep(1000);
-            break;
-        }
-        if (changed) {
-            restart = true;
-            changed = false;
-        }
-    }
-    clear_screen_region(POP_REGION);
-}
-
 //------------------------------------------------------------------------------
 // Public Functions
 //------------------------------------------------------------------------------
@@ -843,25 +658,7 @@ void config_init(void)
 
     error_mode = ERROR_MODE_ADDRESS;
 
-    for (int i = 0; i < MAX_CPUS; i++) {
-        cpu_state[i] = CPU_STATE_ENABLED;
-    }
-
     power_save = POWER_SAVE_HIGH;
-
-#if 0
-    const boot_params_t *boot_params = (boot_params_t *)boot_params_addr;
-
-    uintptr_t cmd_line_addr = boot_params->cmd_line_ptr;
-    if (cmd_line_addr != 0) {
-        int cmd_line_size = boot_params->cmd_line_size;
-        if (cmd_line_size == 0) cmd_line_size = 255;
-        cmd_line_addr = map_region(cmd_line_addr, cmd_line_size, true);
-        if (cmd_line_addr != 0) {
-            parse_command_line((char *)cmd_line_addr, cmd_line_size);
-        }
-    }
-#endif
 }
 
 void config_menu(bool initial)
@@ -881,9 +678,6 @@ void config_menu(bool initial)
         prints(POP_R+5,  POP_LI, "<F3>  CPU sequencing mode");
         prints(POP_R+6,  POP_LI, "<F4>  Error reporting mode");
         if (initial) {
-            if (!smp_enabled)  set_foreground_colour(BOLD+BLACK);
-            prints(POP_R+7,  POP_LI, "<F5>  CPU selection");
-            if (!smp_enabled)  set_foreground_colour(WHITE);
             //if (no_temperature) set_foreground_colour(BOLD+BLACK);
             printk(POP_R+8,  POP_LI, "<F6>  Temperature %s", enable_temperature ? "disable" : "enable ");
             //if (no_temperature) set_foreground_colour(WHITE);
@@ -914,11 +708,7 @@ void config_menu(bool initial)
             error_mode_menu();
             break;
           case '5':
-            if (initial) {
-                if (smp_enabled) {
-                    cpu_selection_menu();
-                }
-            } else {
+            if (!initial) {
                 exit_menu = true;
                 bail = true;
             }
@@ -962,11 +752,6 @@ void config_menu(bool initial)
 
 void initial_config(void)
 {
-    display_initial_notice();
-
-    if (num_available_cpus < 2) {
-        smp_enabled = false;
-    }
     if (pause_at_start) {
         bool got_key = false;
         for (int i = 0; i < 3000 && !got_key; i++) {
@@ -974,17 +759,12 @@ void initial_config(void)
             switch (get_key()) {
               case ESC:
                 clear_message_area();
-                display_notice("Rebooting...");
-                reboot();
+                display_notice("Exiting...");
+                halt(0);
                 break;
               case '1':
                 config_menu(true);
                 got_key = true;
-                break;
-              case '2':
-                smp_enabled = !smp_enabled;
-                display_initial_notice();
-                i = 0;
                 break;
               case ' ':
                 toggle_scroll_lock();

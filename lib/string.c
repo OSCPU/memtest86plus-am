@@ -8,16 +8,13 @@
 // Released under version 2 of the Gnu Public License.
 // By Chris Brady
 
-#include <stddef.h>
-#include <stdint.h>
-
-#include "string.h"
+#include "common.h"
 
 //------------------------------------------------------------------------------
 // Private Functions
 //------------------------------------------------------------------------------
 
-void reverse(char s[])
+static void reverse(char s[])
 {
     int i, j;
     char c;
@@ -31,65 +28,6 @@ void reverse(char s[])
 //------------------------------------------------------------------------------
 // Public Functions
 //------------------------------------------------------------------------------
-
-#if 0
-void *memmove(void *dest, const void *src, size_t n)
-{
-    char *d = (char *)dest, *s = (char *)src;
-
-    if (n > 0) {
-        if (dest < src) {
-            for (size_t i = 0; i < n; i++) {
-                d[i] = s[i];
-            }
-        }
-        if (dest > src) {
-            size_t i = n;
-            do {
-                i--;
-                d[i] = s[i];
-            } while (i > 0);
-        }
-    }
-    return dest;
-}
-#endif
-
-#ifdef DEBUG_GDB
-
-void *memcpy (void *dest, const void *src, size_t len)
-{
-    char *d = dest;
-    const char *s = src;
-    while (len--)
-        *d++ = *s++;
-    return dest;
-}
-
-void *memset (void *dest, int val, size_t len)
-{
-  unsigned char *ptr = dest;
-  while (len-- > 0)
-    *ptr++ = val;
-  return dest;
-}
-
-#endif
-
-char *strstr(const char *haystack, const char *needle)
-{
-    size_t haystack_len = strlen(haystack);
-    size_t needle_len   = strlen(needle);
-
-    size_t max_idx = haystack_len - needle_len;
-
-    for (size_t idx = 0; idx <= max_idx; idx++) {
-        if (memcmp(haystack + idx, needle, needle_len) == 0) {
-            return (char *)haystack + idx;
-        }
-    }
-    return NULL;
-}
 
 char *itoa(int num, char *str)
 {

@@ -13,7 +13,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "boot.h"
+#define AP_STACK_SIZE 1024
 
 /**
  * A single thread-local flag. These are spaced out in memory to ensure each
@@ -40,7 +40,8 @@ static inline local_flag_t *local_flags(int flag_num)
 {
     // The number returned by allocate_local_flag is the byte offset of the
     // flag from the start of the thread-local storage.
-    return (local_flag_t *)(_stacks + BSP_STACK_SIZE - LOCALS_SIZE + flag_num);
+    extern uint8_t _stacks[];
+    return (local_flag_t *)(_stacks + flag_num);
 }
 
 #endif // CPULOCAL_H

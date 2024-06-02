@@ -15,10 +15,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "boot.h"
-
 #include "cache.h"
-#include "cpuid.h"
 #include "memsize.h"
 #include "tsc.h"
 #include "vmem.h"
@@ -172,11 +169,7 @@ int run_test(int my_cpu, int test, int stage, int iterations)
 
         // Moving inversions, fixed random pattern.
       case 5:
-        if (cpuid_info.flags.rdtsc) {
-            prsg_state = get_tsc();
-        } else {
-            prsg_state = 1 + pass_num;
-        }
+        prsg_state = get_tsc();
         prsg_state *= 0x12345678;
 
         for (int i = 0; i < iterations; i++) {
@@ -221,11 +214,7 @@ int run_test(int my_cpu, int test, int stage, int iterations)
 
         // Modulo 20 check, fixed random pattern.
       case 9:
-        if (cpuid_info.flags.rdtsc) {
-            prsg_state = get_tsc();
-        } else {
-            prsg_state = 1 + pass_num;
-        }
+        prsg_state = get_tsc();
         prsg_state *= 0x87654321;
 
         for (int i = 0; i < iterations; i++) {

@@ -20,28 +20,15 @@
  */
 static inline uint64_t read64(const volatile uint64_t *ptr)
 {
-    uint64_t val;
-    __asm__ __volatile__(
-        "movq %1, %0"
-        : "=r" (val)
-        : "m" (*ptr)
-        : "memory"
-    );
-    return val;
+  return *ptr;
 }
 
 /**
  * Writes val to the 64-bit memory location pointed to by ptr.
  */
-static inline void write64(const volatile uint64_t *ptr, uint64_t val)
+static inline void write64(volatile uint64_t *ptr, uint64_t val)
 {
-    __asm__ __volatile__(
-        "movq %1, %0"
-        :
-        : "m" (*ptr),
-          "r" (val)
-        : "memory"
-    );
+  *ptr = val;
 }
 
 /**
@@ -50,14 +37,6 @@ static inline void write64(const volatile uint64_t *ptr, uint64_t val)
  */
 static inline void flush64(const volatile uint64_t *ptr, uint64_t val)
 {
-    __asm__ __volatile__(
-        "movl %1, %0\n"
-        "movl %0, %1"
-        :
-        : "m" (*ptr),
-          "r" (val)
-        : "memory"
-    );
 }
 
 #endif // MEMRW64_H

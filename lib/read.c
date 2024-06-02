@@ -13,12 +13,9 @@
 
 #include "config.h"
 #include "ctype.h"
-#include "keyboard.h"
 #include "print.h"
 #include "serial.h"
 #include "unistd.h"
-
-#include "read.h"
 
 //------------------------------------------------------------------------------
 // Public Functions
