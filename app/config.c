@@ -102,7 +102,7 @@ bool            enable_numa        = false;
 
 bool            enable_ecc_polling = false;
 
-bool            pause_at_start     = true;
+bool            pause_at_start     = false;
 
 power_save_t    power_save         = POWER_SAVE_HIGH;
 
