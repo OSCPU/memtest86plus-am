@@ -6,7 +6,6 @@
 
 #include "cpuinfo.h"
 #include "serial.h"
-#include "tsc.h"
 #include "error.h"
 #include "tests.h"
 #include "display.h"
@@ -52,8 +51,8 @@ static int test_ticks = 0;      // current value (ticks_per_test is final value)
 static int pass_bar_length = 0; // currently displayed length
 static int test_bar_length = 0; // currently displayed length
 
-static uint64_t run_start_time = 0; // TSC time stamp
-static uint64_t next_spin_time = 0; // TSC time stamp
+static uint64_t run_start_time = 0; // us
+static uint64_t next_spin_time = 0; // us
 
 static int prev_sec = -1;               // previous second
 static bool timed_update_done = false;  // update cycle status
@@ -194,11 +193,9 @@ void display_start_run(void)
     display_pass_count(0);
     error_count = 0;
     display_error_count();
-    if (clks_per_msec > 0) {
-        // If we've measured the CPU speed, we know the TSC is available.
-        run_start_time = get_tsc();
-        next_spin_time = run_start_time + SPINNER_PERIOD * clks_per_msec;
-    }
+
+    run_start_time = io_read(AM_TIMER_UPTIME).us;
+    next_spin_time = run_start_time + SPINNER_PERIOD * 1000;
     display_spinner('-');
     display_status("Testing");
 
@@ -227,13 +224,11 @@ void display_start_test(void)
     test_bar_length = 0;
     test_ticks = 0;
 
-#if 0
-    uint64_t current_time = get_tsc();
+    uint64_t current_time = io_read(AM_TIMER_UPTIME).us;
     int secs = (current_time - run_start_time) / (1000 * (uint64_t)clks_per_msec);
     int mins  = secs / 60; secs %= 60;
     int hours = mins / 60; mins %= 60;
     do_trace(0, "T %i: %i:%02i:%02i", test_num, hours, mins, secs);
-#endif
 }
 
 void display_error_count(void)
@@ -403,19 +398,17 @@ void do_tick(int my_cpu)
     display_pass_bar((BAR_LENGTH * pct) / 100);
 
     bool update_spinner = true;
-    if (clks_per_msec > 0) {
-        uint64_t current_time = get_tsc();
+    uint64_t current_time = io_read(AM_TIMER_UPTIME).us;
 
-        int secs  = (current_time - run_start_time) / (1000 * (uint64_t)clks_per_msec);
-        int mins  = secs / 60; secs %= 60; act_sec = secs;
-        int hours = mins / 60; mins %= 60;
-        display_run_time(hours, mins, secs);
+    int secs  = (current_time - run_start_time) / 1000000;
+    int mins  = secs / 60; secs %= 60; act_sec = secs;
+    int hours = mins / 60; mins %= 60;
+    display_run_time(hours, mins, secs);
 
-        if (current_time >= next_spin_time) {
-            next_spin_time = current_time + SPINNER_PERIOD * clks_per_msec;
-        } else {
-            update_spinner = false;
-        }
+    if (current_time >= next_spin_time) {
+      next_spin_time = current_time + SPINNER_PERIOD * 1000;
+    } else {
+      update_spinner = false;
     }
 
     /* ---------------
