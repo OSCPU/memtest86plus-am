@@ -46,7 +46,7 @@ extern barrier_t *run_barrier;
  */
 extern spinlock_t *error_mutex;
 
-#ifdef __x86_64__
+#ifdef __LP64__
 /**
  * The word width (in bits) used for memory testing.
  */

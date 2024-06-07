@@ -74,7 +74,7 @@ static inline uintptr_t round_up(uintptr_t value, size_t align_size)
 static inline testword_t prsg(testword_t state)
 {
     // This uses the algorithms described at https://en.wikipedia.org/wiki/Xorshift
-#ifdef __x86_64__
+#ifdef __LP64__
     state ^= state << 13;
     state ^= state >> 7;
     state ^= state << 17;
